@@ -48,8 +48,9 @@ export default class SubscribedQuest extends Quest {
 
         questData.data;
 
+        if (!process.env.QUEST_CHANNEL_ID) throw new Error('QUEST_CHANNEL_ID is not defined in .env');
         let questChannel: TextChannel = (await client.channels.fetch(
-            "1377652337702604924",
+            process.env.QUEST_CHANNEL_ID
         )) as TextChannel;
 
         const builder = new EmbedBuilder()

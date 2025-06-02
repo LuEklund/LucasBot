@@ -1,8 +1,9 @@
 import type { Command } from "@/command";
 import { Client, GatewayIntentBits, Events } from "discord.js";
 import mongoose from "mongoose";
-import { UserModel } from "./models/user";
+import { giveXP, UserModel } from "./models/user";
 import { Quest } from "./quest";
+import { timeoutTracking } from "./system/timeoutSystem";
 
 const client = new Client({
     intents: [
@@ -85,6 +86,16 @@ async function handleMessageCreate(message: any) {
             dbUser.username = message.author.username;
             await dbUser.save();
         }
+        //Message rewards xp
+        const currentTime = new Date();
+        const timeDifferenceMs =
+            currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
+        const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
+        if (timeDifferenceMinutes >= 1) {
+            giveXP(dbUser.id, 1);
+            dbUser.lastXpMessageAt = currentTime;
+            await dbUser.save();
+        }
     } else {
         dbUser = await UserModel.create({
             id: message.author.id,
@@ -115,6 +126,10 @@ client.once(Events.ClientReady, async (readyClient) => {
 
     client.on(Events.MessageCreate, async (message) => {
         await handleMessageCreate(message);
+    });
+
+    client.on(Events.GuildMemberUpdate, async (oldMemeber, newMember) => {
+        timeoutTracking(oldMemeber, newMember);
     });
 });
 
