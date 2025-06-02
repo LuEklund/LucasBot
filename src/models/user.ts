@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
+import { User } from "discord.js";
 
 const userSchema = new Schema(
     {
@@ -42,12 +43,29 @@ export interface UserDocument extends Document {
 export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
 export const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
-export async function giveXP(userID: string, xp: number) {
-    let dbUser = await UserModel.findOne({ id: userID });
-    if (!dbUser) {
-        return;
+export class SuperUser {
+    discord: User;
+    db: any;
+
+    private constructor(user: User, dbUser: any) {
+        this.discord = user;
+        this.db = dbUser;
     }
 
-    dbUser.xp = Math.max(-100, dbUser.xp + xp);
-    await dbUser.save();
+    static async create(user: User): Promise<SuperUser> {
+        let dbUser = await UserModel.findOne({ id: user.id });
+        if (!dbUser) {
+            console.error("Help");
+        }
+        return new SuperUser(user, dbUser);
+    }
+
+    async giveXP(xp: number) {
+        this.db.xp = Math.max(-100, this.db.xp + xp);
+        this.save()
+    }
+
+    async save() {
+        await this.db.save();
+    }
 }

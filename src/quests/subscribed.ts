@@ -1,4 +1,4 @@
-import { giveXP, UserModel } from "@/models/user";
+import { SuperUser, UserModel } from "@/models/user";
 import { Quest } from "@/quest";
 import {
     ActionRowBuilder,
@@ -15,6 +15,8 @@ export default class SubscribedQuest extends Quest {
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
+        const user = SuperUser.create(interaction.user);
+
         if (interaction.customId === `${this.fileName}#yes`) {
             let message = await interaction.reply(
                 "**" +
@@ -22,7 +24,8 @@ export default class SubscribedQuest extends Quest {
                     "**" +
                     " Good 😊 \nYou gained 10xp! \nNow tell a friend?",
             );
-            await giveXP(interaction.user.id, 10);
+            
+            (await user).giveXP(10);
 
             return true;
         } else if (interaction.customId === `${this.fileName}#no`) {

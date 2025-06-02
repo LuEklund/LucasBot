@@ -1,7 +1,7 @@
 import { Command } from "@/command";
 import { SlashCommandBuilder, User, type Client, type CommandInteraction } from "discord.js";
 import mongoose from "mongoose";
-import { giveXP, UserModel } from '../models/user';
+import { SuperUser, UserModel } from '../models/user';
 
 export default class XpCommand extends Command {
     override get info(): any {
@@ -23,7 +23,7 @@ export default class XpCommand extends Command {
 
     override async executeCommand(client: Client, interaction: CommandInteraction<any>): Promise<void> {
         const userOption = interaction.options.get("user", false);
-        const user = userOption?.user ?? interaction.user;
+        const user = SuperUser.create(userOption?.user ?? interaction.user);
 
         let message: string;
 
@@ -31,12 +31,12 @@ export default class XpCommand extends Command {
 
         const usersModel = await UserModel.find();
         for (const userModel of usersModel) {
-            if (userModel.id == user.id) {
+            if (userModel.id == (await user).discord.id) {
                 xp = userModel.xp;
                 break;
             }
         }
-        message = `${user} has ${xp || "no"} xp`;
+        message = `${(await user).discord} has ${xp || "no"} xp`;
 
         // Command stuff
         const commandOption = interaction.options.get("command", false);
@@ -45,22 +45,14 @@ export default class XpCommand extends Command {
             switch (command[0]) {
                 case "grant":
                     const xp = Number(command[1]);
-                    giveXP(user.id, xp);
-                    message = `${interaction.user} granted ${user} ${xp} xp`;
+                    (await user).giveXP(xp);
+                    message = `${interaction.user} granted ${(await user).discord} ${xp} xp`;
                     break;
 
                 default:
                     message = `Command not found: "${commandOption.value as string}" ¯\\_(ツ)_/¯`;
                     break;
             }
-
-            // if (command[0] == "grant") {
-            //     const xp = Number(command[1]);
-            //     giveXP(user.id, xp);
-            //     message = `${interaction.user} granted ${user} ${xp} xp`;
-            // } else  {
-            //     message = `Command not found: "${commandOption.value as string}" ¯\_(ツ)_/¯`;
-            // }
         }
 
         interaction.reply(message);
