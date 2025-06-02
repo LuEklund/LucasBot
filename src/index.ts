@@ -1,7 +1,7 @@
 import type { Command } from "@/command";
 import { Client, GatewayIntentBits, Events } from "discord.js";
 import mongoose from "mongoose";
-import { giveXP, UserModel } from "./models/user";
+import { SuperUser, UserModel } from "./models/user";
 import { Quest } from "./quest";
 import { timeoutTracking } from "./system/timeoutSystem";
 
@@ -79,25 +79,25 @@ async function handleButtonInteraction(client: Client, interaction: any) {
 }
 
 async function handleMessageCreate(message: any) {
-    let dbUser = await UserModel.findOne({ id: message.author.id });
+    const user = SuperUser.create(message.author);
 
-    if (dbUser) {
-        if (dbUser.username !== message.author.username) {
-            dbUser.username = message.author.username;
-            await dbUser.save();
+    if ((await user).db) {
+        if ((await user).db.username !== message.author.username) {
+            (await user).db.username = message.author.username;
+            (await user).save();
         }
         //Message rewards xp
         const currentTime = new Date();
         const timeDifferenceMs =
-            currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
+            currentTime.getTime() - (await user).db.lastXpMessageAt.getTime();
         const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
         if (timeDifferenceMinutes >= 1) {
-            giveXP(dbUser.id, 1);
-            dbUser.lastXpMessageAt = currentTime;
-            await dbUser.save();
+            (await user).giveXP(1);
+            (await user).db.lastXpMessageAt = currentTime;
+            (await user).save();
         }
     } else {
-        dbUser = await UserModel.create({
+        (await user).db = await UserModel.create({
             id: message.author.id,
             username: message.author.username,
         });
