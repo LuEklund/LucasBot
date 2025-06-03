@@ -1,6 +1,6 @@
 # Lucasbot
 
-A bot that will make you want to watch the globglogabgelab more!!!
+A bot that will make you want to watch the globglogabgelab more!!!!
 
 **Installation**
 [Bun home here!](https://bun.sh/)
