@@ -1,17 +1,27 @@
-# lucasbot
 
-To install dependencies:
+# Lucasbot
+
+A bot that will make you want to watch the globglogabgelab more!!!!
+
+Also I hate merge issues
+
+**Installation**
+[Bun home here!](https://bun.sh/)
+[MongoDB](https://www.mongodb.com/)
+[Discord Developer Portal](https://discord.com/developers/applications)
 
 ```bash
 bun install
 ```
 
-To run:
-
 ```bash
-bun run index.ts
+bun add discord.js
 ```
 
-This project was created using `bun init` in bun v1.2.14. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+```bash
+bun add mongoose
+```
 
-Lucas is a stinky boi
+```
+Now follow the .env.example file
+```
