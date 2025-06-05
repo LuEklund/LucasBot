@@ -1,58 +1,17 @@
 import { Command } from "@/command";
-import { getUserFromId, type UserDocument } from "@/models/user";
+import { getUserFromId } from "@/models/user";
+import { Fighter } from "@/models/fighter";
+import { FightService } from "@/services/fightService";
 import {
-    ActionRowBuilder,
-    ButtonBuilder,
     ButtonInteraction,
-    ButtonStyle,
-    EmbedBuilder,
     SlashCommandBuilder,
     type Client,
     type ChatInputCommandInteraction,
 } from "discord.js";
 
-class Fighter {
-    public readonly dbUser: UserDocument;
-    public posX = 0;
-    public currentHealth = 0;
-    public imageUrl = "";
-
-    constructor(dbUser: UserDocument, startPosition: number, imgUrl: string) {
-        this.dbUser = dbUser;
-        this.posX = startPosition;
-        this.currentHealth = this.getMaxHealthStats();
-        this.imageUrl = imgUrl;
-    }
-
-    getMaxHealthStats(): number {
-        return this.dbUser.vitality * 10;
-    }
-
-    attack(opponent: Fighter): string {
-        if (Math.abs(this.posX - opponent.posX) < 2) {
-            const damage = Math.random() * this.dbUser.strength + 1;
-            return opponent.receiveDamage(damage);
-        }
-        return "Too far away to attack!";
-    }
-
-    receiveDamage(damage: number): string {
-        if (this.dbUser.defense > 0) {
-            if (Math.random() > damage / this.dbUser.defense) {
-                return `${this.dbUser.username}: Blocked the attack!`;
-            }
-        }
-        this.currentHealth = Math.max(0, this.currentHealth - damage);
-        return `${this.dbUser.username}: Received ${damage.toFixed(2)} damage!`;
-    }
-}
-
-//TODO list of active fights; Becaouse otherwise there is only one running.
 export default class FightCommand extends Command {
-    private isActive = false;
-    private readonly players: Fighter[] = [];
-    private readonly arenaSize = 6;
-    private playerTurn = 1;
+    private readonly service = new FightService();
+
     override get info(): any {
         return new SlashCommandBuilder()
             .setName("fight")
@@ -66,23 +25,22 @@ export default class FightCommand extends Command {
             .toJSON();
     }
 
-    private validateTurn(id: string): boolean {
-        if (this.playerTurn === 0 && id === this.players[0]?.dbUser.id) {
-            return true;
-        }
-        if (this.playerTurn === 1 && id === this.players[1]?.dbUser.id) {
-            return true;
-        }
-        return false;
+    private sessionId(interaction: { channelId: string }): string {
+        return interaction.channelId;
     }
 
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
+        const session = this.service.getSession(this.sessionId(interaction));
+        if (!session) {
+            return false;
+        }
+
         if (
-            interaction.user.id !== this.players[0]?.dbUser.id &&
-            interaction.user.id !== this.players[1]?.dbUser.id
+            interaction.user.id !== session.players[0].dbUser.id &&
+            interaction.user.id !== session.players[1].dbUser.id
         ) {
             await interaction.reply({
                 content: "You are not part of this fight!",
@@ -90,242 +48,108 @@ export default class FightCommand extends Command {
             });
             return true;
         }
-        if (this.isActive && this.validateTurn(interaction.user.id)) {
-            const currentPlayer = this.players[this.playerTurn]!;
-            const opponentPlayer = this.players[this.playerTurn === 0 ? 1 : 0]!;
+
+        if (
+            session.isActive &&
+            this.service.validateTurn(session, interaction.user.id)
+        ) {
             if (interaction.customId === "#moveLeft") {
-                if (this.players[this.playerTurn]!.posX > 0) {
-                    this.players[this.playerTurn]!.posX -= 1;
-                    await interaction.update(
-                        this.getFightDisplayOptions("Moved left"),
-                    );
-                }
+                this.service.moveLeft(session);
+                await interaction.update(
+                    this.service.getFightDisplayOptions(session, "Moved left"),
+                );
             } else if (interaction.customId === "#moveRight") {
-                if (this.players[this.playerTurn]!.posX < this.arenaSize - 1) {
-                    this.players[this.playerTurn]!.posX += 1;
-                    await interaction.update(
-                        this.getFightDisplayOptions("Moved right"),
-                    );
-                }
+                this.service.moveRight(session);
+                await interaction.update(
+                    this.service.getFightDisplayOptions(session, "Moved right"),
+                );
             } else if (interaction.customId === "#attack") {
-                const actionInfo: string = currentPlayer.attack(opponentPlayer);
-                if (opponentPlayer.currentHealth <= 0) {
+                const actionInfo = this.service.attack(session);
+                if (
+                    session.players[0].currentHealth <= 0 ||
+                    session.players[1].currentHealth <= 0
+                ) {
                     await interaction.update({
-                        content: `The fight is over! ${currentPlayer.dbUser.username} wins!`,
+                        content: `The fight is over! ${interaction.user.username} wins!`,
                         components: [],
                     });
-                    this.isActive = false;
+                    this.service.deleteFight(this.sessionId(interaction));
                     return true;
                 }
                 await interaction.update(
-                    this.getFightDisplayOptions("Attacked\n" + actionInfo),
+                    this.service.getFightDisplayOptions(
+                        session,
+                        "Attacked\n" + actionInfo,
+                    ),
                 );
+                this.service.toggleTurn(session);
             } else if (interaction.customId === "#flee") {
-                if (currentPlayer.dbUser.agility / 100 > Math.random()) {
+                if (this.service.flee(session)) {
                     await interaction.update({
-                        content: `The fight is over! ${currentPlayer.dbUser.username} escaped!`,
+                        content: `The fight is over! ${interaction.user.username} escaped!`,
                         components: [],
                     });
-                    this.isActive = false;
+                    this.service.deleteFight(this.sessionId(interaction));
                     return true;
                 } else {
                     await interaction.update(
-                        this.getFightDisplayOptions("Failed to flee!"),
+                        this.service.getFightDisplayOptions(
+                            session,
+                            "Failed to flee!",
+                        ),
                     );
+                    this.service.toggleTurn(session);
                 }
-            }
-            if (this.playerTurn == 0) {
-                this.playerTurn = 1;
-            } else {
-                this.playerTurn = 0;
+            } else if (interaction.customId === "#end") {
+                await interaction.update({
+                    content: `The fight was ended by ${interaction.user.username}.`,
+                    components: [],
+                });
+                this.service.deleteFight(this.sessionId(interaction));
+                return true;
             }
             return true;
         }
+
         if (
             interaction.customId === "#acceptFight" &&
-            interaction.user.id === this.players[1]?.dbUser.id
+            interaction.user.id === session.players[1].dbUser.id
         ) {
+            this.service.startFight(this.sessionId(interaction));
             await interaction.update(
-                this.getFightDisplayOptions("Accepted the fight"),
+                this.service.getFightDisplayOptions(
+                    session,
+                    "Accepted the fight",
+                ),
             );
-            this.isActive = true;
-            this.playerTurn = 0;
             return true;
         } else if (interaction.customId === "#declineFight") {
             await interaction.update({
                 content: `The fight was cancelled by ${interaction.user.username}.`,
                 components: [],
             });
-            this.isActive = false;
+            this.service.deleteFight(this.sessionId(interaction));
             return true;
-        } else if (interaction.customId === "#end") {
-            await interaction.update({
-                content: `The fight was ended by ${interaction.user.username}.`,
-                components: [],
-            });
-            this.isActive = false;
         }
         return false;
-    }
-
-    createHealthBar(current: number, max: number, length: number = 10): string {
-        if (max <= 0) return "[:red_square:]";
-        const percentage = current / max;
-        const filled = Math.round(length * percentage);
-        const empty = length - filled;
-        const filledBar = "█".repeat(filled);
-        const emptyBar = " ".repeat(empty);
-        // Using ANSI code block for better visual consistency of the bar
-        return `\`\`\`ansi\n[2;31m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` ${current.toFixed(2)}/${max.toFixed(2)}`;
-    }
-
-    private getFightDisplayOptions(action: string): {
-        embeds: EmbedBuilder[];
-        components: ActionRowBuilder<ButtonBuilder>[];
-    } {
-        const fieldArray: string[] = Array(this.arenaSize).fill("⬜");
-        const currentPlayer = this.players[this.playerTurn]!;
-        const nextPlayer = this.players[this.playerTurn === 0 ? 1 : 0]!;
-        fieldArray[this.players[0]!.posX] = ":person_bald:";
-        fieldArray[this.players[1]!.posX] = ":smirk_cat:";
-        const player1HealthBar = this.createHealthBar(
-            this.players[0]!.currentHealth,
-            this.players[0]!.getMaxHealthStats(),
-        );
-        const player2HealthBar = this.createHealthBar(
-            this.players[1]!.currentHealth,
-            this.players[1]!.getMaxHealthStats(),
-        );
-        const builder = new EmbedBuilder()
-            .setTitle(
-                ":crossed_swords:" +
-                    this.players[0]?.dbUser.username +
-                    " -VS- " +
-                    this.players[1]?.dbUser.username +
-                    ":crossed_swords:",
-            )
-            .setDescription(
-                currentPlayer.dbUser?.username +
-                    ": " +
-                    action +
-                    "\nField:\n " +
-                    fieldArray.join(""),
-            )
-            .addFields(
-                // Player 1 Stats
-                {
-                    name: `${this.players[0]?.dbUser.username}'s Status`,
-                    value:
-                        `❤️ Health: ${player1HealthBar}\n` +
-                        `⚔️ Strength: **${this.players[0]?.dbUser.strength}**\n` +
-                        `🛡️ Defense: **${this.players[0]?.dbUser.defense}**\n` +
-                        `🏃 Agility: **${this.players[0]?.dbUser.agility}** \n` +
-                        `✨ Magicka: **${this.players[0]?.dbUser.magicka}**\n` +
-                        `🔋 Stamina: **${this.players[0]?.dbUser.stamina}**\n` +
-                        `🗣️ Charisma: **${this.players[0]?.dbUser.charisma}**`,
-                    inline: true,
-                },
-                // Player 2 Stats
-                {
-                    name: `${this.players[1]?.dbUser.username}'s Status`,
-                    value:
-                        `❤️ Health: ${player2HealthBar}\n` +
-                        `⚔️ Strength: **${this.players[1]?.dbUser.strength}**\n` +
-                        `🛡️ Defense: **${this.players[1]?.dbUser.defense}**\n` +
-                        `🏃 Agility: **${this.players[1]?.dbUser.agility}**\n` +
-                        `✨ Magicka: **${this.players[1]?.dbUser.magicka}**\n` +
-                        `🔋 Stamina: **${this.players[1]?.dbUser.stamina}**\n` +
-                        `🗣️ Charisma: **${this.players[1]?.dbUser.charisma}**`,
-                    inline: true,
-                },
-            )
-            .setFooter({
-                text: `➡️ It's ${nextPlayer.dbUser.username}'s Turn!`,
-                iconURL: nextPlayer.imageUrl,
-            })
-            .setTimestamp();
-        const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            nextPlayer.posX === 0
-                ? new ButtonBuilder()
-                      .setCustomId("#flee")
-                      .setLabel("Flee")
-                      .setStyle(ButtonStyle.Danger)
-                : new ButtonBuilder()
-                      .setCustomId("#moveLeft")
-                      .setLabel("<<<")
-                      .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId("#attack")
-                .setLabel("Attack")
-                .setStyle(ButtonStyle.Primary),
-            nextPlayer.posX === this.arenaSize - 1
-                ? new ButtonBuilder()
-                      .setCustomId("#flee")
-                      .setLabel("Flee")
-                      .setStyle(ButtonStyle.Danger)
-                : new ButtonBuilder()
-                      .setCustomId("#moveRight")
-                      .setLabel(">>>")
-                      .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId("#end")
-                .setLabel("End Fight (TEST)")
-                .setStyle(ButtonStyle.Primary),
-        );
-
-        return {
-            embeds: [builder],
-            components: [actionRow],
-        };
-    }
-
-    private initiateFight(): {
-        embeds: EmbedBuilder[];
-        components: ActionRowBuilder<ButtonBuilder>[];
-    } {
-        const builder = new EmbedBuilder()
-            .setTitle(
-                ":crossed_swords:" +
-                    this.players[0]?.dbUser.username +
-                    " -VS- " +
-                    this.players[1]?.dbUser.username +
-                    ":crossed_swords:",
-            )
-            .setDescription(
-                this.players[1]?.dbUser.username + " do you accept the fight?",
-            )
-            .setTimestamp();
-        const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId("#acceptFight")
-                .setLabel("Accept Fight")
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId("#declineFight")
-                .setLabel("Decline Fight")
-                .setStyle(ButtonStyle.Danger),
-        );
-        return {
-            embeds: [builder],
-            components: [actionRow],
-        };
     }
 
     override async executeCommand(
         client: Client,
         interaction: ChatInputCommandInteraction,
     ): Promise<void> {
-        if (this.isActive) {
+        const channelId = interaction.channelId;
+        if (this.service.getSession(channelId)) {
             await interaction.reply({
-                content: "A fight is already in progress!",
+                content: "A fight is already in progress in this channel!",
                 ephemeral: true,
             });
             return;
         }
+
         const commandUser = interaction.user;
-        const opponentUser =
-            interaction.options.get("opponent")?.user || commandUser;
-        if (commandUser === opponentUser) {
+        const opponentUser = interaction.options.getUser("opponent", true);
+        if (commandUser.id === opponentUser.id) {
             await interaction.reply({
                 content: "You cannot fight yourself!",
                 ephemeral: true,
@@ -341,19 +165,21 @@ export default class FightCommand extends Command {
             });
             return;
         }
-        this.playerTurn = 1;
-        this.players[0] = new Fighter(
+
+        const fighter1 = new Fighter(
             dbCommandUser,
             0,
             commandUser.displayAvatarURL(),
         );
-        this.players[1] = new Fighter(
+        const fighter2 = new Fighter(
             dbOpponentUser,
-            this.arenaSize - 1,
+            this.service.getArenaSize() - 1,
             opponentUser.displayAvatarURL(),
         );
 
-        const msg = this.initiateFight();
+        this.service.createFight(channelId, fighter1, fighter2);
+        const session = this.service.getSession(channelId)!;
+        const msg = this.service.initiateFight(session);
         await interaction.reply({
             embeds: msg.embeds,
             components: msg.components,
