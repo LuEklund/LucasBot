@@ -1,7 +1,7 @@
 ﻿// src/outcasts/damon/botServices.ts
 import { Client } from "discord.js";
 import { MessageResponderService } from "@/services/messageResponderService.ts";
-import { TimeoutService } from "@/services/timeoutService"; // Added import
+import { TimeoutService } from "@/services/timeoutService";
 
 export interface ILogger {
     info(message: string): void;
@@ -9,7 +9,7 @@ export interface ILogger {
 }
 export class BotServices {
     private readonly messageResponderService: MessageResponderService;
-    private readonly timeoutTrackingService: TimeoutService; // Added service
+    private readonly timeoutTrackingService: TimeoutService;
 
     constructor(
         client: Client,
@@ -19,18 +19,18 @@ export class BotServices {
             client,
             logger,
         );
-        this.timeoutTrackingService = new TimeoutService(client, logger); // Instantiate new service
+        this.timeoutTrackingService = new TimeoutService(client, logger);
     }
 
     start(): void {
         this.logger.info("Bot Services starting.");
         this.messageResponderService.start();
-        this.timeoutTrackingService.start(); // Start new service
+        this.timeoutTrackingService.start();
     }
 
     stop(): void {
         this.messageResponderService.stop();
-        this.timeoutTrackingService.stop(); // Stop new service
+        this.timeoutTrackingService.stop();
         this.logger.info("Bot Services stopped.");
     }
 }
