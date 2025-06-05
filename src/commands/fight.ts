@@ -1,5 +1,5 @@
 import { Command } from "@/command";
-import { getUserFromId, giveGold, type UserDocument } from "@/models/user";
+import { getUserFromId, type UserDocument } from "@/models/user";
 import {
     ActionRowBuilder,
     ButtonBuilder,
@@ -12,51 +12,47 @@ import {
 } from "discord.js";
 
 class Fighter {
-    dbUser?: UserDocument;
-    posX: number = 0;
-    currentHealth: number = 0;
-    imgeUrl: string = "";
+    public readonly dbUser: UserDocument;
+    public posX = 0;
+    public currentHealth = 0;
+    public imageUrl = "";
 
     constructor(dbUser: UserDocument, startPosition: number, imgUrl: string) {
         this.dbUser = dbUser;
         this.posX = startPosition;
         this.currentHealth = this.getMaxHealthStats();
-        this.imgeUrl = imgUrl;
+        this.imageUrl = imgUrl;
     }
 
     getMaxHealthStats(): number {
-        return (this.dbUser?.vitality || 1) * 10;
+        return this.dbUser.vitality * 10;
     }
-    attack(opponent: Fighter) {
+
+    attack(opponent: Fighter): string {
         if (Math.abs(this.posX - opponent.posX) < 2) {
-            const damage = Math.random() * this.dbUser!.strength + 1;
+            const damage = Math.random() * this.dbUser.strength + 1;
             return opponent.receiveDamage(damage);
-        } else {
-            return "Too far away to attack!";
         }
+        return "Too far away to attack!";
     }
-    receiveDamage(damage: number) {
-        if (this.dbUser!.defense > 0) {
-            if (Math.random() > damage / this.dbUser!.defense) {
-                return this.dbUser!.username + ": Blocked the attack!";
+
+    receiveDamage(damage: number): string {
+        if (this.dbUser.defense > 0) {
+            if (Math.random() > damage / this.dbUser.defense) {
+                return `${this.dbUser.username}: Blocked the attack!`;
             }
         }
         this.currentHealth = Math.max(0, this.currentHealth - damage);
-        return (
-            this.dbUser!.username +
-            ": Received " +
-            damage.toFixed(2) +
-            " damage!"
-        );
+        return `${this.dbUser.username}: Received ${damage.toFixed(2)} damage!`;
     }
 }
 
 //TODO list of active fights; Becaouse otherwise there is only one running.
 export default class FightCommand extends Command {
-    isActive: boolean = false;
-    players: Fighter[] = [];
-    arenaSize: number = 6;
-    playerTurn: number = 1;
+    private isActive = false;
+    private readonly players: Fighter[] = [];
+    private readonly arenaSize = 6;
+    private playerTurn = 1;
     override get info(): any {
         console.log("Fight called");
 
@@ -72,10 +68,11 @@ export default class FightCommand extends Command {
             .toJSON();
     }
 
-    validateTurn(id: string): boolean {
-        if (this.playerTurn == 0 && id === this.players[0]?.dbUser!.id) {
+    private validateTurn(id: string): boolean {
+        if (this.playerTurn === 0 && id === this.players[0]?.dbUser.id) {
             return true;
-        } else if (this.playerTurn == 1 && id === this.players[1]?.dbUser!.id) {
+        }
+        if (this.playerTurn === 1 && id === this.players[1]?.dbUser.id) {
             return true;
         }
         return false;
@@ -86,8 +83,8 @@ export default class FightCommand extends Command {
         interaction: ButtonInteraction,
     ): Promise<boolean> {
         if (
-            interaction.user.id !== this.players[0]?.dbUser!.id &&
-            interaction.user.id !== this.players[1]?.dbUser!.id
+            interaction.user.id !== this.players[0]?.dbUser.id &&
+            interaction.user.id !== this.players[1]?.dbUser.id
         ) {
             interaction.reply({
                 content: "You are not part of this fight!",
@@ -116,7 +113,7 @@ export default class FightCommand extends Command {
                 const actionInfo: string = currentPlayer.attack(opponentPlayer);
                 if (opponentPlayer.currentHealth <= 0) {
                     await interaction.update({
-                        content: `The fight is over! ${currentPlayer.dbUser!.username} wins!`,
+                        content: `The fight is over! ${currentPlayer.dbUser.username} wins!`,
                         components: [],
                     });
                     this.isActive = false;
@@ -126,9 +123,9 @@ export default class FightCommand extends Command {
                     this.getFightDisplayOptions("Attacked\n" + actionInfo),
                 );
             } else if (interaction.customId === "#flee") {
-                if (currentPlayer.dbUser!.agility / 100 > Math.random()) {
+                if (currentPlayer.dbUser.agility / 100 > Math.random()) {
                     await interaction.update({
-                        content: `The fight is over! ${currentPlayer.dbUser!.username} escaped!`,
+                        content: `The fight is over! ${currentPlayer.dbUser.username} escaped!`,
                         components: [],
                     });
                     this.isActive = false;
@@ -148,7 +145,7 @@ export default class FightCommand extends Command {
         }
         if (
             interaction.customId === "#acceptFight" &&
-            interaction.user.id === this.players[1]?.dbUser!.id
+            interaction.user.id === this.players[1]?.dbUser.id
         ) {
             await interaction.update(
                 this.getFightDisplayOptions("Accepted the fight"),
@@ -184,8 +181,11 @@ export default class FightCommand extends Command {
         return `\`\`\`ansi\n[2;31m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` ${current.toFixed(2)}/${max.toFixed(2)}`;
     }
 
-    private getFightDisplayOptions(action: string) {
-        let fieldArray: string[] = Array(this.arenaSize).fill("⬜");
+    private getFightDisplayOptions(action: string): {
+        embeds: EmbedBuilder[];
+        components: ActionRowBuilder<ButtonBuilder>[];
+    } {
+        const fieldArray: string[] = Array(this.arenaSize).fill("⬜");
         const currentPlayer = this.players[this.playerTurn]!;
         const nextPlayer = this.players[this.playerTurn === 0 ? 1 : 0]!;
         fieldArray[this.players[0]!.posX] = ":person_bald:";
@@ -201,9 +201,9 @@ export default class FightCommand extends Command {
         const builder = new EmbedBuilder()
             .setTitle(
                 ":crossed_swords:" +
-                    this.players[0]?.dbUser!.username +
+                    this.players[0]?.dbUser.username +
                     " -VS- " +
-                    this.players[1]?.dbUser!.username +
+                    this.players[1]?.dbUser.username +
                     ":crossed_swords:",
             )
             .setDescription(
@@ -216,34 +216,34 @@ export default class FightCommand extends Command {
             .addFields(
                 // Player 1 Stats
                 {
-                    name: `${this.players[0]?.dbUser!.username}'s Status`,
+                    name: `${this.players[0]?.dbUser.username}'s Status`,
                     value:
                         `❤️ Health: ${player1HealthBar}\n` +
-                        `⚔️ Strength: **${this.players[0]?.dbUser!.strength}**\n` +
-                        `🛡️ Defense: **${this.players[0]?.dbUser!.defense}**\n` +
-                        `🏃 Agility: **${this.players[0]?.dbUser!.agility}** \n` +
-                        `✨ Magicka: **${this.players[0]?.dbUser!.magicka}**\n` +
-                        `🔋 Stamina: **${this.players[0]?.dbUser!.stamina}**\n` +
-                        `🗣️ Charisma: **${this.players[0]?.dbUser!.charisma}**`,
+                        `⚔️ Strength: **${this.players[0]?.dbUser.strength}**\n` +
+                        `🛡️ Defense: **${this.players[0]?.dbUser.defense}**\n` +
+                        `🏃 Agility: **${this.players[0]?.dbUser.agility}** \n` +
+                        `✨ Magicka: **${this.players[0]?.dbUser.magicka}**\n` +
+                        `🔋 Stamina: **${this.players[0]?.dbUser.stamina}**\n` +
+                        `🗣️ Charisma: **${this.players[0]?.dbUser.charisma}**`,
                     inline: true,
                 },
                 // Player 2 Stats
                 {
-                    name: `${this.players[1]?.dbUser!.username}'s Status`,
+                    name: `${this.players[1]?.dbUser.username}'s Status`,
                     value:
                         `❤️ Health: ${player2HealthBar}\n` +
-                        `⚔️ Strength: **${this.players[1]?.dbUser!.strength}**\n` +
-                        `🛡️ Defense: **${this.players[1]?.dbUser!.defense}**\n` +
-                        `🏃 Agility: **${this.players[1]?.dbUser!.agility}**\n` +
-                        `✨ Magicka: **${this.players[1]?.dbUser!.magicka}**\n` +
-                        `🔋 Stamina: **${this.players[1]?.dbUser!.stamina}**\n` +
-                        `🗣️ Charisma: **${this.players[1]?.dbUser!.charisma}**`,
+                        `⚔️ Strength: **${this.players[1]?.dbUser.strength}**\n` +
+                        `🛡️ Defense: **${this.players[1]?.dbUser.defense}**\n` +
+                        `🏃 Agility: **${this.players[1]?.dbUser.agility}**\n` +
+                        `✨ Magicka: **${this.players[1]?.dbUser.magicka}**\n` +
+                        `🔋 Stamina: **${this.players[1]?.dbUser.stamina}**\n` +
+                        `🗣️ Charisma: **${this.players[1]?.dbUser.charisma}**`,
                     inline: true,
                 },
             )
             .setFooter({
-                text: `➡️ It's ${nextPlayer.dbUser!.username}'s Turn!`,
-                iconURL: nextPlayer.imgeUrl,
+                text: `➡️ It's ${nextPlayer.dbUser.username}'s Turn!`,
+                iconURL: nextPlayer.imageUrl,
             })
             .setTimestamp();
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -281,17 +281,20 @@ export default class FightCommand extends Command {
         };
     }
 
-    private InitiateFight() {
+    private initiateFight(): {
+        embeds: EmbedBuilder[];
+        components: ActionRowBuilder<ButtonBuilder>[];
+    } {
         const builder = new EmbedBuilder()
             .setTitle(
                 ":crossed_swords:" +
-                    this.players[0]?.dbUser!.username +
+                    this.players[0]?.dbUser.username +
                     " -VS- " +
-                    this.players[1]?.dbUser!.username +
+                    this.players[1]?.dbUser.username +
                     ":crossed_swords:",
             )
             .setDescription(
-                this.players[1]?.dbUser!.username + " do you accept the fight?",
+                this.players[1]?.dbUser.username + " do you accept the fight?",
             )
             .setTimestamp();
         const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -352,7 +355,7 @@ export default class FightCommand extends Command {
             opponentUser.displayAvatarURL(),
         );
 
-        let msg = this.InitiateFight();
+        const msg = this.initiateFight();
         interaction.reply({
             embeds: msg.embeds,
             components: msg.components,
