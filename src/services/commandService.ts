@@ -31,7 +31,7 @@ export class CommandService {
     }
 
     private async registerCommands(): Promise<void> {
-        const glob = new Bun.Glob("./src/commands/*.ts");
+        const glob = new Bun.Glob("./src/commands/**/*.ts");
 
         for (const path of glob.scanSync(".")) {
             const { default: CommandClass } = await import(
