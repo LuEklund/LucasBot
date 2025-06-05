@@ -1,7 +1,7 @@
 import { Command } from "@/core/command";
 import { getUserFromId } from "@/models/user";
 import { Fighter } from "@/models/fighter";
-import { FightController } from "@/controllers/FightController";
+import { FightController } from "@/controllers/fight/FightController";
 import {
     ButtonInteraction,
     SlashCommandBuilder,

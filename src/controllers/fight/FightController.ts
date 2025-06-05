@@ -1,13 +1,13 @@
 import { ButtonInteraction } from "discord.js";
 import type { FightSession } from "@/services/fightSession";
 import { FightService } from "@/services/fightService";
-import accept from "./fightHandlers/accept";
-import attack from "./fightHandlers/attack";
-import decline from "./fightHandlers/decline";
-import endFight from "./fightHandlers/end";
-import flee from "./fightHandlers/flee";
-import moveLeft from "./fightHandlers/moveLeft";
-import moveRight from "./fightHandlers/moveRight";
+import accept from "./handlers/accept";
+import attack from "./handlers/attack";
+import decline from "./handlers/decline";
+import endFight from "./handlers/end";
+import flee from "./handlers/flee";
+import moveLeft from "./handlers/moveLeft";
+import moveRight from "./handlers/moveRight";
 import type { Fighter } from "@/models/fighter";
 
 export class FightController {
