@@ -9,6 +9,7 @@
     },
     "devDependencies": {
         "@types/bun": "latest",
+        "@types/node": "^22",
         "eslint": "^9.27.0",
         "prettier": "^3.5.3"
     },

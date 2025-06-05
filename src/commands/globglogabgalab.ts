@@ -1,9 +1,13 @@
 import { Command } from "@/command";
-import { SlashCommandBuilder, type Client, type CommandInteraction } from "discord.js";
+import {
+    SlashCommandBuilder,
+    type Client,
+    type ChatInputCommandInteraction,
+} from "discord.js";
 
 const songs: string[] = [
-    "hLljd8pfiFg", 
-    "cIwRQwAS_YY", 
+    "hLljd8pfiFg",
+    "cIwRQwAS_YY",
     "7C5zM8CnZF0",
     "2vhQBN0xJJ8",
     "47ZSI7nPAqo",
@@ -77,14 +81,18 @@ export default class GlobglogabgalabCommand extends Command {
             .setName("globglogabgalab")
             .setDescription("Plays a random globglogabgalab song")
             .addNumberOption((option) =>
-                option.setName("index")
-                .setDescription("The index of a specific song")
-                .setRequired(false),
+                option
+                    .setName("index")
+                    .setDescription("The index of a specific song")
+                    .setRequired(false),
             )
             .toJSON();
     }
 
-    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
+    override async executeCommand(
+        client: Client,
+        interaction: ChatInputCommandInteraction,
+    ): Promise<void> {
         const max = songs.length - 1;
         const option = interaction.options.get("index", false)?.value as number;
         const index = option ?? Math.floor(Math.random() * (max + 1));
@@ -93,16 +101,19 @@ export default class GlobglogabgalabCommand extends Command {
 
         let message: string;
 
-        message = index <= max
-            ? `**Index: ${index}/${max}** video *[here](https://www.youtube.com/watch?v=${youtubeId})* ${comment}`
-            : `The max index is ${max}`;
-        
+        message =
+            index <= max
+                ? `**Index: ${index}/${max}** video *[here](https://www.youtube.com/watch?v=${youtubeId})* ${comment}`
+                : `The max index is ${max}`;
 
         // Check for "Christmas"
         const today = new Date(2025, 5, 24); // Month is 0-based: 5 = June
-        const isChristmas = (today.getDate() === 25 || today.getDate() === 24) && today.getMonth() === 11;
-        if (isChristmas) 
-            message = "🎄 Merry Christmas! video *[here](https://www.youtube.com/watch?v=52Li3SLj1gE)*";
+        const isChristmas =
+            (today.getDate() === 25 || today.getDate() === 24) &&
+            today.getMonth() === 11;
+        if (isChristmas)
+            message =
+                "🎄 Merry Christmas! video *[here](https://www.youtube.com/watch?v=52Li3SLj1gE)*";
 
         await interaction.reply(message);
     }

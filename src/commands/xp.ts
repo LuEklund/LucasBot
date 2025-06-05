@@ -4,7 +4,7 @@ import {
     SlashCommandBuilder,
     User,
     type Client,
-    type CommandInteraction,
+    type ChatInputCommandInteraction,
 } from "discord.js";
 import { giveXP, setXP, UserModel } from "../models/user";
 
@@ -65,7 +65,7 @@ export default class XpCommand extends Command {
 
     override async executeCommand(
         client: Client,
-        interaction: CommandInteraction<any>,
+        interaction: ChatInputCommandInteraction,
     ): Promise<void> {
         const sub = interaction.options.getSubcommand();
         const target =
@@ -92,13 +92,13 @@ export default class XpCommand extends Command {
                     giveXP(target.id, amount);
                     interaction.reply({
                         content: `${interaction.user} added ${amount}xp to ${target}`,
-                        flags: "Ephemeral",
+                        ephemeral: true,
                     });
                 } catch (err) {
                     console.error(err);
                     interaction.reply({
                         content: `${interaction.user} failed to give ${target} ${amount}xp`,
-                        flags: "Ephemeral",
+                        ephemeral: true,
                     });
                 }
 
@@ -113,13 +113,13 @@ export default class XpCommand extends Command {
                     setXP(target.id, amount);
                     interaction.reply({
                         content: `${interaction.user} set ${target}'s xp to ${amount}`,
-                        flags: "Ephemeral",
+                        ephemeral: true,
                     });
                 } catch (err) {
                     console.error(err);
                     interaction.reply({
                         content: `${interaction.user} failed to set ${target}'s xp to ${amount}`,
-                        flags: "Ephemeral",
+                        ephemeral: true,
                     });
                 }
 

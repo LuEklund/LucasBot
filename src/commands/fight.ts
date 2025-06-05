@@ -8,7 +8,7 @@ import {
     EmbedBuilder,
     SlashCommandBuilder,
     type Client,
-    type CommandInteraction,
+    type ChatInputCommandInteraction,
 } from "discord.js";
 
 class Fighter {
@@ -91,7 +91,7 @@ export default class FightCommand extends Command {
         ) {
             interaction.reply({
                 content: "You are not part of this fight!",
-                flags: "Ephemeral",
+                ephemeral: true,
             });
             return true;
         }
@@ -312,12 +312,12 @@ export default class FightCommand extends Command {
 
     override async executeCommand(
         client: Client,
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
     ): Promise<void> {
         if (this.isActive) {
             interaction.reply({
                 content: "A fight is already in progress!",
-                flags: "Ephemeral",
+                ephemeral: true,
             });
             return;
         }
@@ -327,7 +327,7 @@ export default class FightCommand extends Command {
         if (commandUser === opponentUser) {
             interaction.reply({
                 content: "You cannot fight yourself!",
-                flags: "Ephemeral",
+                ephemeral: true,
             });
             return;
         }
@@ -336,7 +336,7 @@ export default class FightCommand extends Command {
         if (!dbCommandUser || !dbOpponentUser) {
             interaction.reply({
                 content: "One of the users is not registered in the database.",
-                flags: "Ephemeral",
+                ephemeral: true,
             });
             return;
         }

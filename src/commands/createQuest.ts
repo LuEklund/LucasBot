@@ -4,11 +4,9 @@ import { Quest } from "@/quest";
 import {
     AutocompleteInteraction,
     InteractionContextType,
-    messageLink,
     SlashCommandBuilder,
-    User,
     type Client,
-    type CommandInteraction,
+    type ChatInputCommandInteraction,
 } from "discord.js";
 
 export default class CreateQuestCommand extends Command {
@@ -67,7 +65,7 @@ export default class CreateQuestCommand extends Command {
 
     override async executeCommand(
         client: Client,
-        interaction: CommandInteraction<any>,
+        interaction: ChatInputCommandInteraction,
     ): Promise<void> {
         console.log("getting classes");
 
@@ -77,7 +75,7 @@ export default class CreateQuestCommand extends Command {
             .value as string;
         const questClass = interaction.options.get("class", true)
             .value as string;
-        const creatorId = interaction.member!.id as string;
+        const creatorId = interaction.user.id;
 
         let questClassFilesNames = Quest.getQuests().map((q) => q.fileName);
         if (!questClassFilesNames.includes(questClass)) {

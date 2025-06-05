@@ -4,7 +4,7 @@ import {
     SlashCommandBuilder,
     User,
     type Client,
-    type CommandInteraction,
+    type ChatInputCommandInteraction,
 } from "discord.js";
 
 export default class PingCommand extends Command {
@@ -35,7 +35,7 @@ export default class PingCommand extends Command {
 
     override async executeCommand(
         client: Client,
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
     ): Promise<void> {
         const target =
             interaction.options.get("target")?.user || interaction.user;
@@ -43,7 +43,7 @@ export default class PingCommand extends Command {
         if (amount > 100) {
             interaction.reply({
                 content: `${amount} can't be over 100g`,
-                flags: "Ephemeral",
+                ephemeral: true,
             });
         }
 
@@ -57,7 +57,7 @@ export default class PingCommand extends Command {
             console.error(err);
             interaction.reply({
                 content: `${interaction.user} failed to challange ${target}'s xp to ${amount}`,
-                flags: "Ephemeral",
+                ephemeral: true,
             });
         }
     }

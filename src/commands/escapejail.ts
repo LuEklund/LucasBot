@@ -1,11 +1,9 @@
 import { Command } from "@/command";
-import {
-    giveGold, UserModel 
-} from "@/models/user";
+import { giveGold, UserModel } from "@/models/user";
 import {
     SlashCommandBuilder,
     type Client,
-    type CommandInteraction,
+    type ChatInputCommandInteraction,
 } from "discord.js";
 
 export default class EscapeJailCommand extends Command {
@@ -32,7 +30,7 @@ export default class EscapeJailCommand extends Command {
 
     override async executeCommand(
         client: Client,
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
     ): Promise<void> {
         const action = interaction.options.getString("choice");
 
@@ -44,15 +42,19 @@ export default class EscapeJailCommand extends Command {
                     interaction.reply(
                         "You failed to escape... you were fined extra 10 gold.",
                     );
-                    await giveGold(interaction.user.id, -10)
+                    await giveGold(interaction.user.id, -10);
                 } else {
-                    interaction.reply("The security guard gives in and releases you... congrats.")
+                    interaction.reply(
+                        "The security guard gives in and releases you... congrats.",
+                    );
                 }
-                
+
                 break;
             case "pay_bail":
                 // handle pay bail
-                interaction.reply("You pay the bail of 100 gold and you were freed...")
+                interaction.reply(
+                    "You pay the bail of 100 gold and you were freed...",
+                );
                 await giveGold(interaction.user.id, -100);
                 break;
             default:
