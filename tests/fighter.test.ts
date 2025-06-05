@@ -21,7 +21,7 @@ describe("Fighter", () => {
 
     it("deals damage when attacking", () => {
         const attacker = new Fighter({ ...baseUser }, 0, "");
-        const defender = new Fighter({ ...baseUser }, 1, "");
+        const defender = new Fighter({ ...baseUser, defense: 0 }, 1, "");
         attacker.attack(defender);
         expect(defender.currentHealth).toBeLessThan(
             defender.getMaxHealthStats(),
