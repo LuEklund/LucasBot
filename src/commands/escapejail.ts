@@ -8,7 +8,6 @@ import {
 
 export default class EscapeJailCommand extends Command {
     override get info(): any {
-        console.log("escapejail called");
         return new SlashCommandBuilder()
             .setName("escapejail")
             .setDescription("Try to escape from jail")
@@ -39,12 +38,12 @@ export default class EscapeJailCommand extends Command {
                 // handle the user using charisma
                 let randomNumber = Math.floor(Math.random() * 6);
                 if (randomNumber <= 3) {
-                    interaction.reply(
+                    await interaction.reply(
                         "You failed to escape... you were fined extra 10 gold.",
                     );
                     await giveGold(interaction.user.id, -10);
                 } else {
-                    interaction.reply(
+                    await interaction.reply(
                         "The security guard gives in and releases you... congrats.",
                     );
                 }
@@ -52,14 +51,14 @@ export default class EscapeJailCommand extends Command {
                 break;
             case "pay_bail":
                 // handle pay bail
-                interaction.reply(
+                await interaction.reply(
                     "You pay the bail of 100 gold and you were freed...",
                 );
                 await giveGold(interaction.user.id, -100);
                 break;
             default:
                 // handle unknown option
-                interaction.reply({
+                await interaction.reply({
                     content: "Invalid option",
                     ephemeral: true,
                 });

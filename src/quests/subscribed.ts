@@ -43,7 +43,6 @@ export default class SubscribedQuest extends Quest {
 
     public override async startQuest(client: Client): Promise<void> {
         const questData = await this.getQuestData();
-        console.log("questData", questData);
 
         questData.data;
 

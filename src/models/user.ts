@@ -66,7 +66,6 @@ export async function giveXP(user: User | string, xp: number) {
     if (!dbUser) {
         return;
     }
-    console.log("xp: " + xp);
     if (xp > 0 && dbUser.timeouts > 0) {
         const maxTimeoutsForReduction = 20;
         const minTimeoutsForReduction = 1;
@@ -76,7 +75,6 @@ export async function giveXP(user: User | string, xp: number) {
         reductionFactor = Math.max(0, Math.min(1, reductionFactor));
         xp = xp * (1 - reductionFactor);
     }
-    console.log("new xp: " + xp);
 
     dbUser.xp = Math.max(-100, dbUser.xp + xp);
     await dbUser.save();
@@ -89,7 +87,6 @@ export async function setXP(user: User | string, xp: number) {
     if (!dbUser) {
         return;
     }
-    console.log("xp: " + xp);
     if (xp > 0 && dbUser.timeouts > 0) {
         const maxTimeoutsForReduction = 20;
         const minTimeoutsForReduction = 1;
@@ -99,7 +96,6 @@ export async function setXP(user: User | string, xp: number) {
         reductionFactor = Math.max(0, Math.min(1, reductionFactor));
         xp = xp * (1 - reductionFactor);
     }
-    console.log("new xp: " + xp);
 
     dbUser.xp = Math.max(-100, xp);
     await dbUser.save();

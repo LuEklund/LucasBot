@@ -7,7 +7,6 @@ import {
 
 export default class PingCommand extends Command {
     override get info(): any {
-        console.log("info called");
         return new SlashCommandBuilder()
             .setName("ping")
             .setDescription("test")
@@ -18,6 +17,6 @@ export default class PingCommand extends Command {
         client: Client,
         interaction: ChatInputCommandInteraction,
     ): Promise<void> {
-        interaction.reply("Ping Works!");
+        await interaction.reply("Ping Works!");
     }
 }

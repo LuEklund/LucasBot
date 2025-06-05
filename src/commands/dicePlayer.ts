@@ -9,8 +9,6 @@ import {
 
 export default class PingCommand extends Command {
     override get info(): any {
-        console.log("info called");
-
         return new SlashCommandBuilder()
             .setName("diceplayer")
             .setDescription(
@@ -41,21 +39,22 @@ export default class PingCommand extends Command {
             interaction.options.get("target")?.user || interaction.user;
         const amount = interaction.options.get("amount")?.value as number;
         if (amount > 100) {
-            interaction.reply({
+            await interaction.reply({
                 content: `${amount} can't be over 100g`,
                 ephemeral: true,
             });
+            return;
         }
 
-        const random: boolean = Math.random() % 1 < 0.5;
+        const random: boolean = Math.random() < 0.5;
 
         try {
             const winner: User = random ? interaction.user : target;
             giveGold(winner, amount);
-            interaction.reply(`${winner} wins ${amount}!`);
+            await interaction.reply(`${winner} wins ${amount}!`);
         } catch (err) {
             console.error(err);
-            interaction.reply({
+            await interaction.reply({
                 content: `${interaction.user} failed to challange ${target}'s xp to ${amount}`,
                 ephemeral: true,
             });

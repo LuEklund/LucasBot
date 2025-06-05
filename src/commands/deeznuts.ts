@@ -17,7 +17,6 @@ export default class DeezNutsCommand extends Command {
         client: Client,
         interaction: ChatInputCommandInteraction,
     ): Promise<void> {
-        console.log("deez nuts activated");
-        interaction.reply("ha goteem ha.... goteem");
+        await interaction.reply("ha goteem ha.... goteem");
     }
 }

@@ -1,4 +1,4 @@
-﻿import {
+import {
     Client,
     type EmojiIdentifierResolvable,
     Events,
