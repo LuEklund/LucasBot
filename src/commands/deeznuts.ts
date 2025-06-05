@@ -1,5 +1,9 @@
 import { Command } from "@/command";
-import { SlashCommandBuilder, User, type Client, type CommandInteraction } from "discord.js";
+import {
+    SlashCommandBuilder,
+    type Client,
+    type ChatInputCommandInteraction,
+} from "discord.js";
 
 export default class DeezNutsCommand extends Command {
     override get info(): any {
@@ -9,9 +13,11 @@ export default class DeezNutsCommand extends Command {
             .toJSON();
     }
 
-    override async executeCommand(client: Client, interaction: CommandInteraction): Promise<void> {
+    override async executeCommand(
+        client: Client,
+        interaction: ChatInputCommandInteraction,
+    ): Promise<void> {
         console.log("deez nuts activated");
-
-        interaction.reply("ha goteem ha.... goteem")
+        interaction.reply("ha goteem ha.... goteem");
     }
 }

@@ -5,7 +5,7 @@ import {
     InteractionContextType,
     SlashCommandBuilder,
     type Client,
-    type CommandInteraction,
+    type ChatInputCommandInteraction,
 } from "discord.js";
 
 export default class ExecuteQuestCommand extends Command {
@@ -43,7 +43,7 @@ export default class ExecuteQuestCommand extends Command {
 
     override async executeCommand(
         client: Client,
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
     ): Promise<void> {
         const className = interaction.options.get("class", true)
             .value as string;
