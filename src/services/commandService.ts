@@ -48,7 +48,7 @@ export class CommandService {
     private handleInteraction = async (
         interaction: Interaction,
     ): Promise<void> => {
-        if (interaction.isCommand()) {
+        if (interaction.isChatInputCommand()) {
             await this.handleCommandInteraction(interaction);
         } else if (interaction.isAutocomplete()) {
             await this.handleAutocompleteInteraction(interaction);
