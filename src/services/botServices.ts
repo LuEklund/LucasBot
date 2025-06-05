@@ -1,4 +1,3 @@
-﻿// src/outcasts/damon/botServices.ts
 import { Client } from "discord.js";
 import { MessageResponderService } from "@/services/messageResponderService.ts";
 import { TimeoutService } from "@/services/timeoutService";
