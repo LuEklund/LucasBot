@@ -2,6 +2,7 @@ import { Command } from "@/command";
 import { getUserFromId } from "@/models/user";
 import { Fighter } from "@/models/fighter";
 import { FightService } from "@/services/fightService";
+import type { FightSession } from "@/services/fightSession";
 import {
     ButtonInteraction,
     SlashCommandBuilder,
@@ -11,6 +12,19 @@ import {
 
 export default class FightCommand extends Command {
     private readonly service = new FightService();
+
+    private readonly handlers: Record<
+        string,
+        (session: FightSession, interaction: ButtonInteraction) => Promise<boolean>
+    > = {
+        '#moveLeft': async (s, i) => this.handleMoveLeft(s, i),
+        '#moveRight': async (s, i) => this.handleMoveRight(s, i),
+        '#attack': async (s, i) => this.handleAttack(s, i),
+        '#flee': async (s, i) => this.handleFlee(s, i),
+        '#end': async (s, i) => this.handleEnd(s, i),
+        '#acceptFight': async (s, i) => this.handleAccept(s, i),
+        '#declineFight': async (s, i) => this.handleDecline(s, i),
+    };
 
     override get info(): any {
         return new SlashCommandBuilder()
@@ -29,6 +43,17 @@ export default class FightCommand extends Command {
         return interaction.channelId;
     }
 
+    private isParticipant(session: FightSession, id: string): boolean {
+        return (
+            id === session.players[0].dbUser.id ||
+            id === session.players[1].dbUser.id
+        );
+    }
+
+    private isPlayersTurn(session: FightSession, id: string): boolean {
+        return session.isActive && this.service.validateTurn(session, id);
+    }
+
     public override async onButtonInteract(
         client: Client,
         interaction: ButtonInteraction,
@@ -38,10 +63,7 @@ export default class FightCommand extends Command {
             return false;
         }
 
-        if (
-            interaction.user.id !== session.players[0].dbUser.id &&
-            interaction.user.id !== session.players[1].dbUser.id
-        ) {
+        if (!this.isParticipant(session, interaction.user.id)) {
             await interaction.reply({
                 content: "You are not part of this fight!",
                 ephemeral: true,
@@ -49,89 +71,135 @@ export default class FightCommand extends Command {
             return true;
         }
 
-        if (
-            session.isActive &&
-            this.service.validateTurn(session, interaction.user.id)
-        ) {
-            if (interaction.customId === "#moveLeft") {
-                this.service.moveLeft(session);
-                await interaction.update(
-                    this.service.getFightDisplayOptions(session, "Moved left"),
-                );
-            } else if (interaction.customId === "#moveRight") {
-                this.service.moveRight(session);
-                await interaction.update(
-                    this.service.getFightDisplayOptions(session, "Moved right"),
-                );
-            } else if (interaction.customId === "#attack") {
-                const actionInfo = this.service.attack(session);
-                if (
-                    session.players[0].currentHealth <= 0 ||
-                    session.players[1].currentHealth <= 0
-                ) {
-                    await interaction.update({
-                        content: `The fight is over! ${interaction.user.username} wins!`,
-                        components: [],
-                    });
-                    this.service.deleteFight(this.sessionId(interaction));
-                    return true;
-                }
-                await interaction.update(
-                    this.service.getFightDisplayOptions(
-                        session,
-                        "Attacked\n" + actionInfo,
-                    ),
-                );
-                this.service.toggleTurn(session);
-            } else if (interaction.customId === "#flee") {
-                if (this.service.flee(session)) {
-                    await interaction.update({
-                        content: `The fight is over! ${interaction.user.username} escaped!`,
-                        components: [],
-                    });
-                    this.service.deleteFight(this.sessionId(interaction));
-                    return true;
-                } else {
-                    await interaction.update(
-                        this.service.getFightDisplayOptions(
-                            session,
-                            "Failed to flee!",
-                        ),
-                    );
-                    this.service.toggleTurn(session);
-                }
-            } else if (interaction.customId === "#end") {
-                await interaction.update({
-                    content: `The fight was ended by ${interaction.user.username}.`,
-                    components: [],
-                });
-                this.service.deleteFight(this.sessionId(interaction));
-                return true;
-            }
-            return true;
+        const handler = this.handlers[interaction.customId];
+        if (handler) {
+            return handler(session, interaction);
         }
 
+        return false;
+    }
+
+    private async handleMoveLeft(
+        session: FightSession,
+        interaction: ButtonInteraction,
+    ): Promise<boolean> {
+        if (!this.isPlayersTurn(session, interaction.user.id)) {
+            return false;
+        }
+        this.service.moveLeft(session);
+        await interaction.update(
+            this.service.getFightDisplayOptions(session, 'Moved left'),
+        );
+        return true;
+    }
+
+    private async handleMoveRight(
+        session: FightSession,
+        interaction: ButtonInteraction,
+    ): Promise<boolean> {
+        if (!this.isPlayersTurn(session, interaction.user.id)) {
+            return false;
+        }
+        this.service.moveRight(session);
+        await interaction.update(
+            this.service.getFightDisplayOptions(session, 'Moved right'),
+        );
+        return true;
+    }
+
+    private async handleAttack(
+        session: FightSession,
+        interaction: ButtonInteraction,
+    ): Promise<boolean> {
+        if (!this.isPlayersTurn(session, interaction.user.id)) {
+            return false;
+        }
+        const actionInfo = this.service.attack(session);
         if (
-            interaction.customId === "#acceptFight" &&
-            interaction.user.id === session.players[1].dbUser.id
+            session.players[0].currentHealth <= 0 ||
+            session.players[1].currentHealth <= 0
         ) {
-            this.service.startFight(this.sessionId(interaction));
-            await interaction.update(
-                this.service.getFightDisplayOptions(
-                    session,
-                    "Accepted the fight",
-                ),
-            );
-            return true;
-        } else if (interaction.customId === "#declineFight") {
             await interaction.update({
-                content: `The fight was cancelled by ${interaction.user.username}.`,
+                content: `The fight is over! ${interaction.user.username} wins!`,
                 components: [],
             });
             this.service.deleteFight(this.sessionId(interaction));
             return true;
         }
-        return false;
+        await interaction.update(
+            this.service.getFightDisplayOptions(
+                session,
+                'Attacked\n' + actionInfo,
+            ),
+        );
+        this.service.toggleTurn(session);
+        return true;
+    }
+
+    private async handleFlee(
+        session: FightSession,
+        interaction: ButtonInteraction,
+    ): Promise<boolean> {
+        if (!this.isPlayersTurn(session, interaction.user.id)) {
+            return false;
+        }
+        if (this.service.flee(session)) {
+            await interaction.update({
+                content: `The fight is over! ${interaction.user.username} escaped!`,
+                components: [],
+            });
+            this.service.deleteFight(this.sessionId(interaction));
+            return true;
+        }
+        await interaction.update(
+            this.service.getFightDisplayOptions(session, 'Failed to flee!'),
+        );
+        this.service.toggleTurn(session);
+        return true;
+    }
+
+    private async handleEnd(
+        session: FightSession,
+        interaction: ButtonInteraction,
+    ): Promise<boolean> {
+        if (!this.isPlayersTurn(session, interaction.user.id)) {
+            return false;
+        }
+        await interaction.update({
+            content: `The fight was ended by ${interaction.user.username}.`,
+            components: [],
+        });
+        this.service.deleteFight(this.sessionId(interaction));
+        return true;
+    }
+
+    private async handleAccept(
+        session: FightSession,
+        interaction: ButtonInteraction,
+    ): Promise<boolean> {
+        if (interaction.user.id !== session.players[1].dbUser.id) {
+            return false;
+        }
+        this.service.startFight(this.sessionId(interaction));
+        await interaction.update(
+            this.service.getFightDisplayOptions(
+                session,
+                'Accepted the fight',
+            ),
+        );
+        return true;
+    }
+
+    private async handleDecline(
+        session: FightSession,
+        interaction: ButtonInteraction,
+    ): Promise<boolean> {
+        await interaction.update({
+            content: `The fight was cancelled by ${interaction.user.username}.`,
+            components: [],
+        });
+        this.service.deleteFight(this.sessionId(interaction));
+        return true;
     }
 
     override async executeCommand(
