@@ -18,7 +18,6 @@ export abstract class Quest {
         const glob = new Bun.Glob("src/quests/*.ts");
 
         for (const path of glob.scanSync(".")) {
-            const file = Bun.file(path);
 
             const { default: QuestClass } = await import(
                 path.replace("src/quests/", "../quests/")

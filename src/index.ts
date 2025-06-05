@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Events } from "discord.js";
+import { Client, GatewayIntentBits, Events, type Message } from "discord.js";
 import mongoose from "mongoose";
 import { giveXP, UserModel } from "./models/user";
 import { BotServices } from "@/services/botServices";
@@ -13,7 +13,8 @@ export const client = new Client({
     ],
 });
 
-async function handleMessageCreate(message: any) {
+async function handleMessageCreate(message: Message) {
+    if (message.author.bot || !message.guild) return;
     let dbUser = await UserModel.findOne({ id: message.author.id });
 
     if (dbUser) {
