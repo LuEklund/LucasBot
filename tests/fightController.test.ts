@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "bun:test";
-import { FightController } from "../src/controllers/FightController";
+import { FightController } from "../src/controllers/fight/FightController";
 import { Fighter } from "../src/models/fighter";
 
 const baseUser = {
