@@ -50,11 +50,9 @@ export default class CreateQuestCommand extends Command {
     ): Promise<void> {
         const focusedOption = interaction.options.getFocused(true).name;
 
-        console.log("executeAutoComplete:focusedOption", focusedOption);
-
         if (focusedOption == "class") {
             interaction.respond(
-                await Quest.getQuests().map((q) => ({
+                Quest.getQuests().map((q) => ({
                     name: q.fileName,
                     value: q.fileName,
                 })),
@@ -67,8 +65,6 @@ export default class CreateQuestCommand extends Command {
         client: Client,
         interaction: ChatInputCommandInteraction,
     ): Promise<void> {
-        console.log("getting classes");
-
         const title = interaction.options.get("title", true).value as string;
         const imageUrl = interaction.options.get("image", true).value as string;
         const description = interaction.options.get("description", true)

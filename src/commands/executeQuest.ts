@@ -32,7 +32,7 @@ export default class ExecuteQuestCommand extends Command {
         const focusedOption = interaction.options.getFocused(true).name;
         if (focusedOption == "class") {
             interaction.respond(
-                await Quest.getQuests().map((q) => ({
+                Quest.getQuests().map((q) => ({
                     name: q.fileName,
                     value: q.fileName,
                 })),

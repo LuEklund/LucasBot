@@ -76,7 +76,6 @@ const songs: string[] = [
 ];
 export default class GlobglogabgalabCommand extends Command {
     override get info(): any {
-        console.log("info called");
         return new SlashCommandBuilder()
             .setName("globglogabgalab")
             .setDescription("Plays a random globglogabgalab song")

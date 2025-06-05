@@ -11,7 +11,7 @@ import {
 
 export default class TestQuest extends Quest {
     public override async onButtonInteract(
-        client:  Client,
+        client: Client,
         interaction: ButtonInteraction,
     ): Promise<boolean> {
         if (interaction.customId === `${this.fileName}#help`) {
@@ -26,7 +26,6 @@ export default class TestQuest extends Quest {
 
     public override async startQuest(client: Client): Promise<void> {
         const questData = await this.getQuestData();
-        console.log("questData", questData);
 
         let questChannel: TextChannel = (await client.channels.fetch(
             process.env.QUEST_CHANNEL_ID || "undefined",

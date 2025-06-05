@@ -54,8 +54,6 @@ export default class FightCommand extends Command {
     private readonly arenaSize = 6;
     private playerTurn = 1;
     override get info(): any {
-        console.log("Fight called");
-
         return new SlashCommandBuilder()
             .setName("fight")
             .setDescription("fight a player")
@@ -86,7 +84,7 @@ export default class FightCommand extends Command {
             interaction.user.id !== this.players[0]?.dbUser.id &&
             interaction.user.id !== this.players[1]?.dbUser.id
         ) {
-            interaction.reply({
+            await interaction.reply({
                 content: "You are not part of this fight!",
                 ephemeral: true,
             });
@@ -318,7 +316,7 @@ export default class FightCommand extends Command {
         interaction: ChatInputCommandInteraction,
     ): Promise<void> {
         if (this.isActive) {
-            interaction.reply({
+            await interaction.reply({
                 content: "A fight is already in progress!",
                 ephemeral: true,
             });
@@ -328,7 +326,7 @@ export default class FightCommand extends Command {
         const opponentUser =
             interaction.options.get("opponent")?.user || commandUser;
         if (commandUser === opponentUser) {
-            interaction.reply({
+            await interaction.reply({
                 content: "You cannot fight yourself!",
                 ephemeral: true,
             });
@@ -337,7 +335,7 @@ export default class FightCommand extends Command {
         const dbCommandUser = await getUserFromId(commandUser.id);
         const dbOpponentUser = await getUserFromId(opponentUser.id);
         if (!dbCommandUser || !dbOpponentUser) {
-            interaction.reply({
+            await interaction.reply({
                 content: "One of the users is not registered in the database.",
                 ephemeral: true,
             });
@@ -356,7 +354,7 @@ export default class FightCommand extends Command {
         );
 
         const msg = this.initiateFight();
-        interaction.reply({
+        await interaction.reply({
             embeds: msg.embeds,
             components: msg.components,
         });

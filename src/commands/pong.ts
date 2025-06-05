@@ -25,9 +25,7 @@ export default class PongCommand extends Command {
             "user",
         ) as GuildMember | null;
 
-        console.log(member);
-
         const name = member?.nickname ?? member?.user.username ?? "nope";
-        interaction.reply("Pong Works! " + name);
+        await interaction.reply("Pong Works! " + name);
     }
 }
