@@ -7,7 +7,12 @@ export default async function endFight(
     interaction: ButtonInteraction,
     service: FightService,
 ): Promise<boolean> {
-    if (!(session.isActive && service.validateTurn(session, interaction.user.id))) {
+    if (
+        !(
+            session.isActive &&
+            service.validateTurn(session, interaction.user.id)
+        )
+    ) {
         return false;
     }
     await interaction.update({

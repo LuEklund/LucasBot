@@ -1,6 +1,6 @@
-import { Command } from "@/command";
+import { Command } from "@/core/command";
 import { QuestModel } from "@/models/quest";
-import { Quest } from "@/quest";
+import { Quest } from "@/core/quest";
 import {
     AutocompleteInteraction,
     InteractionContextType,
