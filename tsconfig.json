@@ -22,7 +22,7 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "noPropertyAccessFromIndexSignature": false,
-        "types": ["node", "bun-types"],
+        "types": ["bun-types"],
         "paths": {
             "@/*": ["./src/*"]
         }
