@@ -15,7 +15,11 @@ export class FightController {
 
     private readonly handlers: Record<
         string,
-        (session: FightSession, interaction: ButtonInteraction, service: FightService) => Promise<boolean>
+        (
+            session: FightSession,
+            interaction: ButtonInteraction,
+            service: FightService,
+        ) => Promise<boolean>
     > = {
         "#moveLeft": moveLeft,
         "#moveRight": moveRight,

@@ -7,7 +7,12 @@ export default async function attack(
     interaction: ButtonInteraction,
     service: FightService,
 ): Promise<boolean> {
-    if (!(session.isActive && service.validateTurn(session, interaction.user.id))) {
+    if (
+        !(
+            session.isActive &&
+            service.validateTurn(session, interaction.user.id)
+        )
+    ) {
         return false;
     }
     const actionInfo = service.attack(session);

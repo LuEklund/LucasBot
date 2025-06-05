@@ -1,5 +1,5 @@
 import type { ButtonInteraction, Client } from "discord.js";
-import { QuestModel, type QuestDocument } from "./models/quest";
+import { QuestModel, type QuestDocument } from "../models/quest";
 
 export abstract class Quest {
     public async onButtonInteract(
@@ -21,7 +21,7 @@ export abstract class Quest {
             const file = Bun.file(path);
 
             const { default: QuestClass } = await import(
-                path.replace("src/quests/", "./quests/")
+                path.replace("src/quests/", "../quests/")
             );
             const quest: Quest = new QuestClass();
 

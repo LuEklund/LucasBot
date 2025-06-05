@@ -1,5 +1,5 @@
-import { Command } from "@/command";
-import { Quest } from "@/quest";
+import { Command } from "@/core/command";
+import { Quest } from "@/core/quest";
 import {
     AutocompleteInteraction,
     InteractionContextType,

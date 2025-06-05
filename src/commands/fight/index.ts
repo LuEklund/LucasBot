@@ -1,8 +1,13 @@
-import { Command } from "@/command";
+import { Command } from "@/core/command";
 import { getUserFromId } from "@/models/user";
 import { Fighter } from "@/models/fighter";
 import { FightController } from "@/controllers/FightController";
-import { ButtonInteraction, SlashCommandBuilder, type Client, type ChatInputCommandInteraction } from "discord.js";
+import {
+    ButtonInteraction,
+    SlashCommandBuilder,
+    type Client,
+    type ChatInputCommandInteraction,
+} from "discord.js";
 
 export default class FightCommand extends Command {
     private readonly controller = new FightController();

@@ -1,5 +1,5 @@
 import { giveXP, UserModel } from "@/models/user";
-import { Quest } from "@/quest";
+import { Quest } from "@/core/quest";
 import {
     ActionRowBuilder,
     ButtonBuilder,

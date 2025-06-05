@@ -6,8 +6,8 @@ import type {
     Interaction,
 } from "discord.js";
 import { Events } from "discord.js";
-import { Quest } from "@/quest";
-import type { Command } from "@/command";
+import { Quest } from "@/core/quest";
+import type { Command } from "@/core/command";
 import type { ILogger } from "@/services/botServices";
 
 export class CommandService {
