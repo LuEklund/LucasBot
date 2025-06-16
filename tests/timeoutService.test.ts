@@ -25,3 +25,19 @@ test("increments timeout when member timed out", async () => {
     );
     spy.mockRestore();
 });
+
+test("start registers guild member update handler", () => {
+    const client = { on: mock(() => {}), off: mock(() => {}) } as any;
+    const service = new TimeoutService(client, logger);
+    service.start();
+    expect(client.on).toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith("Timeout Tracking Service starting.");
+});
+
+test("stop unregisters guild member update handler", () => {
+    const client = { on: mock(() => {}), off: mock(() => {}) } as any;
+    const service = new TimeoutService(client, logger);
+    service.stop();
+    expect(client.off).toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith("Timeout Tracking Service stopped.");
+});

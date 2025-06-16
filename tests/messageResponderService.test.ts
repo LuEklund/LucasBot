@@ -29,3 +29,21 @@ test("reacts with thumbs down for bad user", async () => {
     await (service as any).handleMessage(msg);
     expect(msg.react).toHaveBeenCalledWith(THUMBS_DOWN);
 });
+
+test("start registers message handler", () => {
+    const client = { on: mock(() => {}), off: mock(() => {}) } as any;
+    const logger = { info: mock(() => {}), error: mock(() => {}) } as any;
+    const service = new MessageResponderService(client, logger);
+    service.start();
+    expect(client.on).toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith("Message Responder Service starting.");
+});
+
+test("stop unregisters message handler", () => {
+    const client = { on: mock(() => {}), off: mock(() => {}) } as any;
+    const logger = { info: mock(() => {}), error: mock(() => {}) } as any;
+    const service = new MessageResponderService(client, logger);
+    service.stop();
+    expect(client.off).toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith("Message Responder Service stopped.");
+});
