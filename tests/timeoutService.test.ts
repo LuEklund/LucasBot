@@ -1,13 +1,11 @@
 import { test, expect, spyOn, mock } from "bun:test";
-import { TimeoutService } from "../src/services/timeoutService";
+import TimeoutService from "../src/services/timeout";
 import { UserModel } from "../src/models/user";
-
-const logger = { info: mock(() => {}), error: mock(() => {}) } as any;
 
 const client = {} as any;
 
 test("increments timeout when member timed out", async () => {
-    const service = new TimeoutService(client, logger);
+    const service = new TimeoutService();
     const oldMember = { communicationDisabledUntil: null } as any;
     const newMember = {
         communicationDisabledUntil: new Date(),
@@ -28,16 +26,14 @@ test("increments timeout when member timed out", async () => {
 
 test("start registers guild member update handler", () => {
     const client = { on: mock(() => {}), off: mock(() => {}) } as any;
-    const service = new TimeoutService(client, logger);
-    service.start();
+    const service = new TimeoutService();
+    service.start(client);
     expect(client.on).toHaveBeenCalled();
-    expect(logger.info).toHaveBeenCalledWith("Timeout Tracking Service starting.");
 });
 
 test("stop unregisters guild member update handler", () => {
     const client = { on: mock(() => {}), off: mock(() => {}) } as any;
-    const service = new TimeoutService(client, logger);
-    service.stop();
+    const service = new TimeoutService();
+    service.stop(client);
     expect(client.off).toHaveBeenCalled();
-    expect(logger.info).toHaveBeenCalledWith("Timeout Tracking Service stopped.");
 });
