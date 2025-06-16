@@ -10,6 +10,7 @@
 
 - Run `bun test` to execute the full suite. All tests must pass before committing.
 - Check workflows under `.github/workflows` for the CI plan.
+- After tests pass, copy the latest summary into the `README.md` Test Results section.
 
 ## PR instructions
 

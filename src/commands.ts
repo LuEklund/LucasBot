@@ -6,7 +6,7 @@ import {
     SlashCommandSubcommandBuilder,
     ApplicationCommandOptionType,
 } from "discord.js";
-import { client } from ".";
+let client: import("discord.js").Client | undefined;
 
 export namespace Command {
     export abstract class Base {
@@ -16,16 +16,12 @@ export namespace Command {
         public get slash(): SlashCommandBuilder {
             const builder = new SlashCommandBuilder().setName(this.main.name).setDescription(this.main.description);
 
-            if (this.main.options && this.main.options.length > 0)
-                applyOptionsToDiscordBuilder(builder, this.main.options);
+            if (this.main.options && this.main.options.length > 0) applyOptionsToDiscordBuilder(builder, this.main.options);
 
             this.subs.forEach((subCommand) => {
-                const subBuilder = new SlashCommandSubcommandBuilder()
-                    .setName(subCommand.name)
-                    .setDescription(subCommand.description);
+                const subBuilder = new SlashCommandSubcommandBuilder().setName(subCommand.name).setDescription(subCommand.description);
 
-                if (subCommand.options && subCommand.options.length > 0)
-                    applyOptionsToDiscordBuilder(subBuilder, subCommand.options);
+                if (subCommand.options && subCommand.options.length > 0) applyOptionsToDiscordBuilder(subBuilder, subCommand.options);
 
                 builder.addSubcommand(subBuilder);
             });
@@ -49,15 +45,11 @@ export namespace Command {
             name: string,
             description: string,
             options: Option[],
-            onExecute: (interaction: CommandInteraction) => Promise<InteractionResponse<boolean>> = (
-                interaction: CommandInteraction,
-            ) => {
+            onExecute: (interaction: CommandInteraction) => Promise<InteractionResponse<boolean>> = (interaction: CommandInteraction) => {
                 return interaction.reply("");
             },
 
-            onAutocomplete: (interaction: AutocompleteInteraction) => Promise<void> = (
-                interaction: AutocompleteInteraction,
-            ) => {
+            onAutocomplete: (interaction: AutocompleteInteraction) => Promise<void> = (interaction: AutocompleteInteraction) => {
                 return interaction.respond([]);
             },
         ) {
@@ -92,6 +84,8 @@ export namespace Command {
         const glob = new Bun.Glob("src/commands/*.ts");
         console.log(`Loaded commands:`);
 
+        if (!client) ({ client } = await import("."));
+
         for (const path of glob.scanSync(".")) {
             const { default: CommandClass } = await import(path.replace("src/commands/", "./commands/"));
             const command: Base = new CommandClass();
@@ -110,10 +104,7 @@ export namespace Command {
         }
     }
 
-    function applyOptionsToDiscordBuilder<T extends SlashCommandBuilder | SlashCommandSubcommandBuilder>(
-        builder: T,
-        options: Option[],
-    ): T {
+    function applyOptionsToDiscordBuilder<T extends SlashCommandBuilder | SlashCommandSubcommandBuilder>(builder: T, options: Option[]): T {
         for (const option of options) {
             switch (option.type) {
                 case ApplicationCommandOptionType.String:
@@ -122,17 +113,11 @@ export namespace Command {
                         if (option.required !== undefined) opt.setRequired(option.required);
                         if (option.autocomplete !== undefined) opt.setAutocomplete(option.autocomplete);
 
-                        if (
-                            "choices" in option &&
-                            option.choices &&
-                            option.type === ApplicationCommandOptionType.String
-                        ) {
+                        if ("choices" in option && option.choices && option.type === ApplicationCommandOptionType.String) {
                             opt.addChoices(...option.choices);
                         }
-                        if ("min_length" in option && option.min_length !== undefined)
-                            opt.setMinLength(option.min_length);
-                        if ("max_length" in option && option.max_length !== undefined)
-                            opt.setMaxLength(option.max_length);
+                        if ("min_length" in option && option.min_length !== undefined) opt.setMinLength(option.min_length);
+                        if ("max_length" in option && option.max_length !== undefined) opt.setMaxLength(option.max_length);
                         return opt;
                     });
                     break;
@@ -142,11 +127,7 @@ export namespace Command {
                         if (option.required !== undefined) opt.setRequired(option.required);
                         if (option.autocomplete !== undefined) opt.setAutocomplete(option.autocomplete);
 
-                        if (
-                            "choices" in option &&
-                            option.choices &&
-                            option.type === ApplicationCommandOptionType.Integer
-                        ) {
+                        if ("choices" in option && option.choices && option.type === ApplicationCommandOptionType.Integer) {
                             opt.addChoices(...option.choices);
                         }
                         if ("min_value" in option && option.min_value !== undefined) opt.setMinValue(option.min_value);
@@ -160,11 +141,7 @@ export namespace Command {
                         if (option.required !== undefined) opt.setRequired(option.required);
                         if (option.autocomplete !== undefined) opt.setAutocomplete(option.autocomplete);
 
-                        if (
-                            "choices" in option &&
-                            option.choices &&
-                            option.type === ApplicationCommandOptionType.Number
-                        ) {
+                        if ("choices" in option && option.choices && option.type === ApplicationCommandOptionType.Number) {
                             opt.addChoices(...option.choices);
                         }
                         if ("min_value" in option && option.min_value !== undefined) opt.setMinValue(option.min_value);
