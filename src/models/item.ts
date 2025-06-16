@@ -30,6 +30,17 @@ export namespace ItemDB {
     export type ModelType = mongoose.Model<Document>;
     export const Model = mongoose.model<Document>("Item", schema);
 
+    export async function getWeaponFromName(
+        name: string,
+    ): Promise<Document | null> {
+        try {
+            return await Model.findOne({ name });
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+
     export async function getFromName(name: string): Promise<Document | null> {
         try {
             return await Model.findOne({ name }).exec();
@@ -78,4 +89,5 @@ export namespace ItemDB {
     }
 }
 
-export const Item = undefined;
+export const ItemModel = ItemDB.Model;
+export const getWeaponFromName = ItemDB.getWeaponFromName;

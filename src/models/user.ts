@@ -73,4 +73,53 @@ export namespace UserDB {
     export const Model = mongoose.model<Document>("User", schema);
 }
 
-export const UserModel = undefined;
+export const UserModel = UserDB.Model;
+
+export async function getIdFromUser(user: string | { id: string }): Promise<string> {
+    return typeof user === "string" ? user : user.id;
+}
+
+export async function getUserFromId(id: string): Promise<UserDB.Document | null> {
+    return UserModel.findOne({ id });
+}
+
+export async function giveXP(id: string, amount: number): Promise<number> {
+    const user = await UserModel.findOne({ id });
+    if (!user) return 0;
+    user.xp += amount;
+    await user.save();
+    return amount;
+}
+
+export async function setXP(id: string, xp: number): Promise<number> {
+    const user = await UserModel.findOne({ id });
+    if (!user) return 0;
+    if (xp > 0 && user.timeouts > 0) {
+        const maxTimeoutsForReduction = 20;
+        const minTimeoutsForReduction = 1;
+        let reductionFactor =
+            (user.timeouts - minTimeoutsForReduction) /
+            (maxTimeoutsForReduction - minTimeoutsForReduction);
+        reductionFactor = Math.max(0, Math.min(1, reductionFactor));
+        xp = xp * (1 - reductionFactor);
+    }
+    user.xp = xp;
+    await user.save();
+    return xp;
+}
+
+export async function giveGold(id: string, amount: number): Promise<number> {
+    const user = await UserModel.findOne({ id });
+    if (!user) return 0;
+    user.balance = (user as any).balance + amount;
+    await user.save();
+    return amount;
+}
+
+export async function setGold(id: string, amount: number): Promise<number> {
+    const user = await UserModel.findOne({ id });
+    if (!user) return 0;
+    user.balance = amount;
+    await user.save();
+    return amount;
+}
