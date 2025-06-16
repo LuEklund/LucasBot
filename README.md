@@ -105,6 +105,16 @@ bun run lint         # ESLint
 bun run test         # Bun test runner
 ```
 
+## ✅ Test Results
+
+```bash
+$ bun test
+ 39 pass
+ 0 fail
+ 58 expect() calls
+Ran 39 tests across 13 files. [620ms]
+```
+
 ---
 
 ## ⛴️ Deployment Recipes
