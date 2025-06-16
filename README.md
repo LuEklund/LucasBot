@@ -1,8 +1,8 @@
 # LucasBot
 
-LucasBot is a **TypeScript + [Bun](https://bun.sh)** powered Discord bot that sprinkles a light‑weight yet surprisingly addictive *RPG‑flavoured* progression layer onto your Discord server. It ships with slash‑command mini‑games, XP & gold rewards, user‑driven quests, and handy role utilities – all persisted in **MongoDB Atlas**, so your hard‑earned loot never disappears when the host restarts.
+LucasBot is a **TypeScript + [Bun](https://bun.sh)** powered Discord bot that sprinkles a light‑weight yet surprisingly addictive _RPG‑flavoured_ progression layer onto your Discord server. It ships with slash‑command mini‑games, XP & gold rewards, user‑driven quests, and handy role utilities – all persisted in **MongoDB Atlas**, so your hard‑earned loot never disappears when the host restarts.
 
-> “A bot that will make you want to watch the globglogabgalab more!” – *original author*
+> “A bot that will make you want to watch the globglogabgalab more!” – _original author_
 
 LucasBot was designed for rapid iteration, minimal runtime overhead, and no‑friction deployment. Whether you are looking to gamify a small study group or add depth to a 10 000‑member community, you can spin up the bot in minutes and start earning 📈 XP.
 
@@ -10,14 +10,14 @@ LucasBot was designed for rapid iteration, minimal runtime overhead, and no‑fr
 
 ## ✨ Features
 
-| Category           | Command(s)                      | Description                                                                                                                     |
-| ------------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| 🎲 **Mini‑games**  | `/diceplayer`                   | Competitive dice roll that awards XP & gold to the highest roller. Ties trigger a sudden‑death throw‑off.                       |
-| 🗺️ **Quests**     | `/createquest`, `/executequest` | Create narrative quests with branching outcomes. Quests support Markdown in descriptions, optional images, and dynamic rewards. |
-| 💬 **Fun**         | `/globglogabgalab`, `/deeznuts` | A single‑slash gateway to everyone’s favourite library creature. Plays a random quote plus an Easter‑egg GIF...  and a command featuring a random deceased meme called "Deez Nuts" |
-| 📈 **Progression** | `/xp`, `/award`, `/escapejail` | View personal stats or manually award XP & gold to a user or role. Includes leaderboard auto‑pagination.                        |
-| 🛡️ **Roles**      | `/role add/remove/list`         | Self‑assignable roles with optional level requirements and emoji icons.                                                         |
-| 🔧 **Utilities**   | `/ping`, `/pong`, `/uptime`     | Latency test, Easter‑egg reply, and how long the bot has been running.                                                          |
+| Category           | Command(s)                      | Description                                                                                                                                                                       |
+| ------------------ | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🎲 **Mini‑games**  | `/diceplayer`                   | Competitive dice roll that awards XP & gold to the highest roller. Ties trigger a sudden‑death throw‑off.                                                                         |
+| 🗺️ **Quests**      | `/createquest`, `/executequest` | Create narrative quests with branching outcomes. Quests support Markdown in descriptions, optional images, and dynamic rewards.                                                   |
+| 💬 **Fun**         | `/globglogabgalab`, `/deeznuts` | A single‑slash gateway to everyone’s favourite library creature. Plays a random quote plus an Easter‑egg GIF... and a command featuring a random deceased meme called "Deez Nuts" |
+| 📈 **Progression** | `/xp`, `/award`, `/escapejail`  | View personal stats or manually award XP & gold to a user or role. Includes leaderboard auto‑pagination.                                                                          |
+| 🛡️ **Roles**       | `/role add/remove/list`         | Self‑assignable roles with optional level requirements and emoji icons.                                                                                                           |
+| 🔧 **Utilities**   | `/ping`, `/pong`, `/uptime`     | Latency test, Easter‑egg reply, and how long the bot has been running.                                                                                                            |
 
 All commands leverage Discord’s **interaction** model: autocomplete, context‑aware validation, and helpful ephemeral error messages. New commands automatically appear in the in‑client command list the moment you deploy.
 
@@ -31,7 +31,7 @@ All commands leverage Discord’s **interaction** model: autocomplete, context�
 | --------------------------------------- | ------------------------------- | ----------------------------------- |
 | ![commands list](docs/img/commands.png) | ![dice roll](docs/img/dice.gif) | ![quest dialog](docs/img/quest.png) |
 
-> *Don’t see images?* Clone the repo and open `docs/img/` locally.
+> _Don’t see images?_ Clone the repo and open `docs/img/` locally.
 
 ---
 
@@ -73,7 +73,7 @@ $ bun run dev
 When the bot starts it will:
 
 1. Log in to Discord and print the invite URL in the console.
-2. Register slash‑commands *globally* (or to `DEV_GUILD_ID` if set) – propagation takes \~1 h globally, <1 s per guild.
+2. Register slash‑commands _globally_ (or to `DEV_GUILD_ID` if set) – propagation takes \~1 h globally, <1 s per guild.
 3. Connect to MongoDB and seed an **admin** user document for the bot owner.
 
 Press <kbd>Ctrl +C</kbd> to stop. All in‑memory cooldown timers are persisted before exit.
@@ -102,7 +102,7 @@ bun run dev          # dev server with watch
 bun run build        # transpile to dist/
 bun run start        # production mode (uses dist/) – set NODE_ENV=production
 bun run lint         # ESLint
-bun run test         # Vitest unit tests (≈ 20 ms)
+bun run test         # Bun test runner
 ```
 
 ---
@@ -129,16 +129,16 @@ Fly’s ephemeral VMs spin up in <200 ms, making them perfect for Bun.
 
 ```yaml
 services:
-  lucasbot:
-    image: oven/bun:latest
-    volumes:
-      - ./:/app
-    working_dir: /app
-    command: ["bun","run","start"]
-    environment:
-      BOT_TOKEN: ${BOT_TOKEN}
-      MONGO_URI: ${MONGO_URI}
-      QUEST_CHANNEL_ID: ${QUEST_CHANNEL_ID}
+    lucasbot:
+        image: oven/bun:latest
+        volumes:
+            - ./:/app
+        working_dir: /app
+        command: ["bun", "run", "start"]
+        environment:
+            BOT_TOKEN: ${BOT_TOKEN}
+            MONGO_URI: ${MONGO_URI}
+            QUEST_CHANNEL_ID: ${QUEST_CHANNEL_ID}
 ```
 
 > **Note:** Bun’s image is \~60 MB – half the size of Node 18‑alpine.
@@ -147,10 +147,10 @@ services:
 
 ## 🔐 Security & Permissions
 
-* The bot only requests the **applications.commands** and **bot** scopes.
-* Required bot permissions: `Send Messages`, `Embed Links`, `Read Message History`, `Add Reactions`, `Use Slash Commands`.
-* It does *not* require `Administrator`.
-* All database credentials are loaded from environment variables; no secrets in code.
+- The bot only requests the **applications.commands** and **bot** scopes.
+- Required bot permissions: `Send Messages`, `Embed Links`, `Read Message History`, `Add Reactions`, `Use Slash Commands`.
+- It does _not_ require `Administrator`.
+- All database credentials are loaded from environment variables; no secrets in code.
 
 ---
 
@@ -186,28 +186,28 @@ For the full list: `/help` or see `docs/COMMANDS.md` (generated).
 
 ## 🧑‍💻 Contributing
 
-We welcome PRs of *any* size – from typo fixes to new mini‑games.
+We welcome PRs of _any_ size – from typo fixes to new mini‑games.
 
 1. **Fork** the repo & create a feature branch.
 2. `bun prettier --write .` before committing.
 3. Push & open a **draft PR** early for feedback.
 4. All checks (lint, type‑check, unit tests) must pass before review.
-5. PRs that change commands *must* update `docs/COMMANDS.md` (run `bun run docs`).
+5. PRs that change commands _must_ update `docs/COMMANDS.md` (run `bun run docs`).
 
 ### 🌟 Contributor Rewards
 
-Contributors earn in‑repo XP! A GitHub Action awards 🟡 *gold stars* to merged PR authors – purely for bragging rights.
+Contributors earn in‑repo XP! A GitHub Action awards 🟡 _gold stars_ to merged PR authors – purely for bragging rights.
 
 ---
 
 ## 🗺️ Roadmap
 
-* [x] XP & Level system
-* [x] Quest engine with branching storylines
-* [ ] Blackjack mini‑game *(in progress)*
-* [ ] Trivia mini‑game with OpenTDB integration
-* [ ] In‑bot marketplace to spend gold on custom roles & badges
-* [ ] Web dashboard (Next.js) for configuring quests visually
+- [x] XP & Level system
+- [x] Quest engine with branching storylines
+- [ ] Blackjack mini‑game _(in progress)_
+- [ ] Trivia mini‑game with OpenTDB integration
+- [ ] In‑bot marketplace to spend gold on custom roles & badges
+- [ ] Web dashboard (Next.js) for configuring quests visually
 
 > Vote on features in [Discussions → Ideas](https://github.com/<your‑org>/LucasBot/discussions).
 

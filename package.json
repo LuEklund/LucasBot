@@ -5,7 +5,8 @@
     "private": true,
     "scripts": {
         "dev": "bun run --watch src/index.ts",
-        "format": "bun prettier --write ."
+        "format": "bun prettier --write .",
+        "test": "bun test"
     },
     "devDependencies": {
         "@types/bun": "latest",
