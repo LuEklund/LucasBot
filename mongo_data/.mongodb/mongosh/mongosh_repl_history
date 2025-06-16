@@ -1,0 +1,29 @@
+db.users.find().limit(5)
+db.find().limit(5)
+show collections
+use mydiscordapp
+show dbs
+dbs
+db.users.find().limit(5)
+show collections
+use mydiscordapp
+show collections
+use mydiscrodapp
+show dbs
+mongorestore --drop --uri="mongodb://localhost:27017" --nsFrom="test.*" --nsTo="mydiscordapp.*" ./MongoDB/
+show collections
+use mydiscordapp
+show dbs
+dbs
+show collections
+use mydoscordapp
+show dbs
+dbs
+db.users.find({ username: 'lucasdevelops' })
+db.users.find(username: 'lucasdevelops').
+db.users.find().limit(5)
+db.quests.find().limit(5)
+show collections
+use test
+show mydiscordapp
+show dbs

@@ -1,0 +1,1 @@
+docker run -d -p 27017:27017 -v ./mongo_data:/data/db --name my-mongo-db my-mongo-app

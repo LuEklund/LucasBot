@@ -1,0 +1,39 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: discord_bun_app
+        ports:
+            - "3000:3000"
+        volumes:
+            - .:/app
+            - /app/node_modules
+        environment:
+            DATABASE_URL: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongo:27017/mydiscordapp?authSource=admin
+            NODE_ENV: production
+            PORT: 3000
+        depends_on:
+            - mongo
+        networks:
+            - app-network
+
+    mongo:
+        image: mongo:6.0
+        container_name: mongodb_database
+        ports:
+            - "27017:27017"
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+        volumes:
+            - mongo_data:/data/db
+        networks:
+            - app-network
+
+volumes:
+    mongo_data:
+
+networks:
+    app-network:
+        driver: bridge

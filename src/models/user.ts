@@ -1,133 +1,76 @@
-import type { User } from "discord.js";
-import mongoose, { Document, Schema } from "mongoose";
-import { client } from "..";
+import mongoose, { Document as MDocument, Schema } from "mongoose";
 
-const userSchema = new Schema(
-    {
-        id: { type: String },
-        username: { type: String },
-        timeouts: { type: Number, default: 0.0 },
-        xp: { type: Number, default: 0.0 },
-        lastXpMessageAt: { type: Schema.Types.Date, default: Date.now },
-        balance: { type: Number, default: 0.0 },
-        skillPoints: { type: Number, default: 0.0 },
-        Weapon: { type: String, default: "Fists" },
-        strength: { type: Number, default: 3.0 },
-        agility: { type: Number, default: 10.0 },
-        charisma: { type: Number, default: 0.0 },
-        magicka: { type: Number, default: 0.0 },
-        stamina: { type: Number, default: 3.0 },
-        defense: { type: Number, default: 3.0 },
-        vitality: { type: Number, default: 1.0 },
-    },
-    { timestamps: true },
-);
+export namespace UserDB {
+    export namespace StatDB {
+        export const schema = new Schema(
+            {
+                strength: { type: Number, default: 3.0 },
+                agility: { type: Number, default: 10.0 },
+                charisma: { type: Number, default: 1.0 },
+                magicka: { type: Number, default: 1.0 },
+                stamina: { type: Number, default: 3.0 },
+                defense: { type: Number, default: 3.0 },
+                vitality: { type: Number, default: 1.0 },
+            },
+            { _id: false },
+        );
 
-export interface UserDocument extends Document {
-    id: string;
-    username: string;
-    timeouts: number;
-    xp: number;
-    lastXpMessageAt: Date;
-    balance: number;
-    skillPoints: number;
-    Weapon: string;
-    strength: number;
-    agility: number;
-    charisma: number;
-    magicka: number;
-    stamina: number;
-    defense: number;
-    vitality: number;
+        export interface Document extends MDocument {
+            strength: number;
+            agility: number;
+            charisma: number;
+            magicka: number;
+            stamina: number;
+            defense: number;
+            vitality: number;
+        }
+
+        export type Model = mongoose.InferSchemaType<typeof StatDB.schema>;
+        export const Model = mongoose.model<StatDB.Document>("Stats", StatDB.schema);
+    }
+
+    export const schema = new Schema(
+        {
+            id: { type: String, required: true, unique: true },
+            username: { type: String, required: true },
+            timeouts: { type: Number, default: 0.0 },
+            level: { type: Number, default: 0 },
+            xp: { type: Number, default: 0.0 },
+            lastXpMessageAt: { type: Date, default: Date.now },
+            skillPoints: { type: Number, default: 0.0 },
+            stats: {
+                type: StatDB.schema,
+                default: () => ({
+                    strength: 3.0,
+                    agility: 10.0,
+                    charisma: 1.0,
+                    magicka: 1.0,
+                    stamina: 3.0,
+                    defense: 3.0,
+                    vitality: 1.0,
+                }),
+            },
+            portalsEntered: { type: Number, default: 0.0 },
+        },
+        { timestamps: true },
+    );
+
+    export interface Document extends MDocument {
+        id: string;
+        username: string;
+        timeouts: number;
+        level: number;
+        xp: number;
+        lastXpMessageAt: Date;
+        skillPoints: number;
+        stats: StatDB.Document;
+        portalsEntered: number;
+        createdAt: Date;
+        updatedAt: Date;
+    }
+
+    export type Model = mongoose.InferSchemaType<typeof schema>;
+    export const Model = mongoose.model<Document>("User", schema);
 }
 
-export type UserModel = mongoose.InferSchemaType<typeof userSchema>;
-export const UserModel = mongoose.model<UserDocument>("User", userSchema);
-
-export async function getUserFromId(id: string): Promise<UserDocument | null> {
-    try {
-        const user = await UserModel.findOne({ id: id });
-        return user;
-        // return await client.users.fetch(id);
-    } catch (error) {
-        console.error(`Failed to fetch user with ID ${id}:`, error);
-        return null;
-    }
-}
-
-export async function getIdFromUser(user: User | string): Promise<string> {
-    if (typeof user === "object" && user !== null && "id" in user) {
-        return String(user.id);
-    }
-    return user;
-}
-
-export async function giveXP(user: User | string, xp: number) {
-    const id = await getIdFromUser(user);
-    let dbUser = await UserModel.findOne({ id: id });
-    if (!dbUser) {
-        return;
-    }
-    console.log("xp: " + xp);
-    if (xp > 0 && dbUser.timeouts > 0) {
-        const maxTimeoutsForReduction = 20;
-        const minTimeoutsForReduction = 1;
-        let reductionFactor =
-            (dbUser.timeouts - minTimeoutsForReduction) /
-            (maxTimeoutsForReduction - minTimeoutsForReduction);
-        reductionFactor = Math.max(0, Math.min(1, reductionFactor));
-        xp = xp * (1 - reductionFactor);
-    }
-    console.log("new xp: " + xp);
-
-    dbUser.xp = Math.max(-100, dbUser.xp + xp);
-    await dbUser.save();
-    return xp;
-}
-
-export async function setXP(user: User | string, xp: number) {
-    const id = await getIdFromUser(user);
-    let dbUser = await UserModel.findOne({ id: id });
-    if (!dbUser) {
-        return;
-    }
-    console.log("xp: " + xp);
-    if (xp > 0 && dbUser.timeouts > 0) {
-        const maxTimeoutsForReduction = 20;
-        const minTimeoutsForReduction = 1;
-        let reductionFactor =
-            (dbUser.timeouts - minTimeoutsForReduction) /
-            (maxTimeoutsForReduction - minTimeoutsForReduction);
-        reductionFactor = Math.max(0, Math.min(1, reductionFactor));
-        xp = xp * (1 - reductionFactor);
-    }
-    console.log("new xp: " + xp);
-
-    dbUser.xp = Math.max(-100, xp);
-    await dbUser.save();
-    return xp;
-}
-
-export async function giveGold(user: User | string, amount: number) {
-    const id = await getIdFromUser(user);
-    let dbUser = await UserModel.findOne({ id: id });
-    if (!dbUser) {
-        return;
-    }
-
-    dbUser.balance = Math.max(-1000, dbUser.balance + amount);
-    await dbUser.save();
-    return amount;
-}
-
-export async function setGold(user: User | string, amount: number) {
-    const id = await getIdFromUser(user);
-    let dbUser = await UserModel.findOne({ id: id });
-    if (!dbUser) {
-        return;
-    }
-
-    dbUser.balance = Math.max(-1000, amount);
-    await dbUser.save();
-    return amount;
-}
+export const UserModel = undefined;

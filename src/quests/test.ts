@@ -1,63 +1,37 @@
+import { ButtonInteraction, Message } from "discord.js";
 import { Quest } from "@/quest";
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonInteraction,
-    ButtonStyle,
-    EmbedBuilder,
-    type Client,
-    type TextChannel,
-} from "discord.js";
+import { AppButton } from "@/button";
+import { Globals } from "..";
 
-export default class TestQuest extends Quest {
-    public override async onButtonInteract(
-        client:  Client,
-        interaction: ButtonInteraction,
-    ): Promise<boolean> {
-        if (interaction.customId === `${this.fileName}#help`) {
-            await interaction.reply(
-                "This is a help message for the Test Quest.",
-            );
-            return true;
-        }
+export default class TestQuest extends Quest.Base {
+    public override buttons: AppButton[] = [new AppButton("Test Label", this.onPressTest.bind(this))];
 
-        return false;
+    amount: number = 0;
+
+    public override async start(): Promise<Message<true>> {
+        const actionRow = AppButton.createActionRow(this.buttons);
+
+        return await Globals.CHANNEL.send({
+            content: "Test!!!",
+            components: actionRow,
+        });
     }
 
-    public override async startQuest(client: Client): Promise<void> {
-        const questData = await this.getQuestData();
-        console.log("questData", questData);
+    public override async end(): Promise<Quest.EndReturn> {
+        return Quest.end(this.name);
+    }
 
-        let questChannel: TextChannel = (await client.channels.fetch(
-            process.env.QUEST_CHANNEL_ID || "undefined",
-        )) as TextChannel;
+    private async onPressTest(interaction: ButtonInteraction): Promise<void> {
+        this.amount += 1;
+        await interaction.reply({
+            content: `Added 1 to the amount, new amount is now ${this.amount}`,
+            flags: "Ephemeral",
+        });
 
-        const builder = new EmbedBuilder()
-            .setTitle(questData.title)
-            .setDescription(questData.description.replace(/\\n/g, "\n"))
-            .setColor("#0099ff")
-            .setThumbnail(questData.imageUrl)
-            .addFields({
-                name: "QuestName",
-                value: this.fileName,
-            })
-            .setFooter({ text: "Quest Footer" })
-            .setTimestamp();
+        if (this.amount >= 3) this.end();
 
-        const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId(`${this.fileName}#help`)
-                .setLabel("Help")
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId(`${this.fileName}#let_be`)
-                .setLabel("Let Be")
-                .setStyle(ButtonStyle.Primary),
-        );
-
-        let msg = await questChannel.send({
-            embeds: [builder],
-            components: [actionRow],
+        this.message.edit({
+            content: this.amount >= 3 ? `Final amount was: ${this.amount}` : `Amount is now: ${this.amount}`,
         });
     }
 }

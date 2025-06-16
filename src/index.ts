@@ -1,159 +1,111 @@
-import type { Command } from "@/command";
-import {
-    Client,
-    GatewayIntentBits,
-    Events,
-    REST,
-    Guild,
-    GuildScheduledEvent,
-    ApplicationCommandPermissionType,
-    Routes,
-} from "discord.js";
-// import { Routes } from "discord-api-types/v10";
-// import { ApplicationCommandPermissionType } from "discord-api-types/v10";
+import { Service } from "@/service";
+import { Client, GatewayIntentBits, Partials, Events, ActivityType, TextChannel } from "discord.js";
 import mongoose from "mongoose";
-import { giveXP, UserModel } from "./models/user";
 import { Quest } from "./quest";
-import { BotServices } from "@/services/botServices";
+import { Command } from "./commands";
+
+// Stats emoji
+// Global link AKA Lucas's yt
+export namespace Globals {
+    export const ATTRIBUTES = {
+        strength: {
+            name: "Strength",
+            value: "strength",
+            emoji: "💪",
+        },
+        defense: {
+            name: "Defense",
+            value: "defense",
+            emoji: "🛡️",
+        },
+        agility: {
+            name: "Agility",
+            value: "Agility",
+            emoji: "💨",
+        },
+        magicka: {
+            name: "Magicka",
+            value: "magicka",
+            emoji: "🔮",
+        },
+        vitality: {
+            name: "Vitality",
+            value: "vitality",
+            emoji: "❤️",
+        },
+        stamina: {
+            name: "Stamina",
+            value: "stamina",
+            emoji: "🔋",
+        },
+        charisma: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: "🔥",
+        },
+        gold: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: "💰",
+        },
+        xp: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: "🌟",
+        },
+        skillpoint: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: ":bulb:",
+        },
+        items: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: "📦",
+        },
+        level: {
+            name: "Charisma",
+            value: "charisma",
+            emoji: ":arrow_up:",
+        },
+    };
+
+    export const LINK: string = "https://www.youtube.com/@LucasDevelop";
+    export let CHANNEL: TextChannel;
+
+    export function random(max: number, min: number = 0): number {
+        return Math.floor(Math.random() * (max - min) + min);
+    }
+}
 
 export const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.MessageContent,
     ],
+    partials: [Partials.Message, Partials.Reaction, Partials.User],
 });
-
-const commands = new Map<string, Command>();
-
-async function registerCommands(client: Client) {
-    const glob = new Bun.Glob("./src/commands/*.ts");
-
-    for (const path of glob.scanSync(".")) {
-        const { default: CommandClass } = await import(
-            path.replace("./src/", "./")
-        );
-        const instance: Command = new CommandClass();
-        const info = instance.info;
-        commands.set(info.name, instance);
-        client.application?.commands.create(info);
-        console.log(`Registered command: ${info.name}`);
-    }
-}
-
-async function handleCommandInteraction(client: Client, interaction: any) {
-    const command = commands.get(interaction.commandName);
-
-    if (!command) {
-        return interaction.reply("Command not found.");
-    }
-
-    try {
-        await command.executeCommand(client, interaction);
-    } catch (err) {
-        console.error(`Error running command ${interaction.commandName}:`, err);
-        interaction.reply("Error executing command.");
-    }
-}
-
-async function handleAutocompleteInteraction(client: Client, interaction: any) {
-    const command = commands.get(interaction.commandName);
-    if (!command) {
-        interaction.respond([]);
-        return;
-    }
-    try {
-        await command.executeAutoComplete(client, interaction);
-    } catch (err) {
-        console.error(
-            `Error running autocomplete for command ${interaction.commandName}:`,
-            err,
-        );
-        interaction.respond([]);
-    }
-}
-
-async function handleButtonInteraction(client: Client, interaction: any) {
-    for (const quest of await Quest.getQuests()) {
-        try {
-            if (await quest.onButtonInteract(client, interaction)) {
-                break;
-            }
-        } catch (err) {
-            console.error(
-                `Error running button interaction for quest ${quest.fileName}:`,
-                err,
-            );
-        }
-    }
-    for (const command of await commands) {
-        try {
-            if (await command[1].onButtonInteract(client, interaction)) {
-                break;
-            }
-        } catch (err) {
-            console.error(
-                `Error running button interaction for quest ${command[0]}:`,
-                err,
-            );
-        }
-    }
-}
-
-async function handleMessageCreate(message: any) {
-    let dbUser = await UserModel.findOne({ id: message.author.id });
-
-    if (dbUser) {
-        if (dbUser.username !== message.author.username) {
-            dbUser.username = message.author.username;
-            await dbUser.save();
-        }
-        //Message rewards xp
-        const currentTime = new Date();
-        const timeDifferenceMs =
-            currentTime.getTime() - dbUser.lastXpMessageAt.getTime();
-        const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60);
-        if (timeDifferenceMinutes >= 1) {
-            giveXP(dbUser.id, 1);
-            dbUser.lastXpMessageAt = currentTime;
-            await dbUser.save();
-        }
-    } else {
-        dbUser = await UserModel.create({
-            id: message.author.id,
-            username: message.author.username,
-        });
-    }
-}
 
 client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
-    let services: BotServices;
-    services = new BotServices(client);
-    services.start();
-
-    console.log("Connecting to MongoDB...");
-    await mongoose.connect(process.env.MONGO_URI!);
+    await mongoose.connect(process.env.DATABASE_URL || "mongodb://localhost:27017/mydiscordapp");
     console.log("Connected to MongoDB");
 
-    await registerCommands(client);
-    await Quest.loadQuests();
+    (async () => {
+        if (!process.env.QUEST_CHANNEL_ID) throw new Error("QUEST_CHANNEL_ID is not defined in .env");
+        Globals.CHANNEL = (await client.channels.fetch(process.env.QUEST_CHANNEL_ID)) as TextChannel;
 
-    client.on(Events.InteractionCreate, async (interaction) => {
-        if (interaction.isCommand()) {
-            await handleCommandInteraction(client, interaction);
-        } else if (interaction.isAutocomplete()) {
-            await handleAutocompleteInteraction(client, interaction);
-        } else if (interaction.isButton()) {
-            await handleButtonInteraction(client, interaction);
-        }
-    });
+        await Service.load(client);
+        await Service.start(client);
+        await Quest.load();
+        await Command.load();
+    })();
 
-    client.on(Events.MessageCreate, async (message) => {
-        await handleMessageCreate(message);
-    });
+    await Service.stop(client);
 });
 
 client.login(process.env.BOT_TOKEN);
