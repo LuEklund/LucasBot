@@ -1,7 +1,7 @@
 import { ButtonInteraction, Message } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class TestQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Test Label", this.onPressTest.bind(this))];

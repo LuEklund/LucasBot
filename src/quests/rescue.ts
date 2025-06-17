@@ -2,7 +2,7 @@ import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class RescueQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Rescue the villager", this.onPressRescue.bind(this))];
@@ -57,10 +57,7 @@ export default class RescueQuest extends Quest.Base {
         const playersWon = playerStrength > beastStrengh;
         const goldReward = Math.floor(Math.random() * (this.maxGoldReward - this.minGoldReward)) + this.minGoldReward;
 
-        if (playersWon)
-            users.forEach(
-                async (user) => await user.addGold(goldReward).addXP(this.xpReward).upgradeSkill("strength").save(),
-            );
+        if (playersWon) users.forEach(async (user) => await user.addGold(goldReward).addXP(this.xpReward).upgradeSkill("strength").save());
         else
             users.forEach(async (user) => {
                 await user.downgradeSkill("strength").save();

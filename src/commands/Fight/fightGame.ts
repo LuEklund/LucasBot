@@ -1,5 +1,5 @@
 import { AppButton } from "@/button";
-import { Globals } from "@/index";
+import { Globals } from "@/globals";
 import type { AppUser } from "@/user";
 import {
     ActionRowBuilder,

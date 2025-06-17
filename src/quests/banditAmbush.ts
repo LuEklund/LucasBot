@@ -2,7 +2,7 @@ import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class BanditAmbushQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Help", this.onPressHelp.bind(this))];

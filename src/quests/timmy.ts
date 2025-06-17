@@ -2,13 +2,10 @@ import { Message, ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class TimmyQuest extends Quest.Base {
-    public override buttons: AppButton[] = [
-        new AppButton("Help", this.onPressHelp),
-        new AppButton("Kill", this.onPressKill),
-    ];
+    public override buttons: AppButton[] = [new AppButton("Help", this.onPressHelp), new AppButton("Kill", this.onPressKill)];
 
     public override async start(): Promise<Message<true>> {
         const actionRow = AppButton.createActionRow(this.buttons);

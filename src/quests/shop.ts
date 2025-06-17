@@ -3,7 +3,7 @@ import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
 import { ItemDB } from "@/models/item";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class ShopQuest extends Quest.Base {
     public override buttons: AppButton[] = [];

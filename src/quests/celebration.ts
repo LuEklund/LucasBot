@@ -2,7 +2,7 @@ import { Message, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export interface Celebration {
     title: string;
@@ -51,9 +51,7 @@ export default class CelebrationQuest extends Quest.Base {
 
         this.goldReward = Math.floor(Math.random() * 5);
 
-        (await Globals.CHANNEL.guild.members.fetch()).forEach(async (member) =>
-            (await AppUser.fromID(member.id)).addGold(this.goldReward).save(),
-        );
+        (await Globals.CHANNEL.guild.members.fetch()).forEach(async (member) => (await AppUser.fromID(member.id)).addGold(this.goldReward).save());
 
         return await Globals.CHANNEL.send({
             embeds: [embed],

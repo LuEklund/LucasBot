@@ -3,7 +3,7 @@ import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { ItemDB } from "@/models/item";
 import { AppUser } from "@/user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class PackageQuest extends Quest.Base {
     public override buttons: AppButton[] = [
@@ -97,9 +97,7 @@ export default class PackageQuest extends Quest.Base {
 
         const embed = new EmbedBuilder()
             .setTitle("Mysterious Package")
-            .setDescription(
-                `${user.discord} found a buyer of the package, and recived ${goldAmount.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
-            )
+            .setDescription(`${user.discord} found a buyer of the package, and recived ${goldAmount.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`)
             .setColor("#C1A471")
             .setURL(Globals.LINK)
             .toJSON();

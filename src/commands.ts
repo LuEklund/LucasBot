@@ -84,7 +84,7 @@ export namespace Command {
         const glob = new Bun.Glob("src/commands/*.ts");
         console.log(`Loaded commands:`);
 
-        if (!client) ({ client } = await import("."));
+        if (!client) ({ client } = await import("./client"));
 
         for (const path of glob.scanSync(".")) {
             const { default: CommandClass } = await import(path.replace("src/commands/", "./commands/"));

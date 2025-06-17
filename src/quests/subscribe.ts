@@ -2,13 +2,10 @@ import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class SubscribeQuest extends Quest.Base {
-    public override buttons: AppButton[] = [
-        new AppButton("Yes", this.onPressYes.bind(this)),
-        new AppButton("No", this.onPressNo.bind(this)),
-    ];
+    public override buttons: AppButton[] = [new AppButton("Yes", this.onPressYes.bind(this)), new AppButton("No", this.onPressNo.bind(this))];
     players: string[] = [];
 
     xpRewardAmount: number = 10;
