@@ -1,5 +1,6 @@
 import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel, EmbedBuilder } from "discord.js";
 import { client } from "./client";
+import { env } from "./env";
 import { UserDB } from "./models/user";
 import { InventoryDB } from "./models/inventory";
 import { ItemDB } from "./models/item";
@@ -229,8 +230,7 @@ export class AppUser {
     ///                      OTHER                         //
     /////////////////////////////////////////////////////////
     async level(xp: number): Promise<void> {
-        if (!process.env.QUEST_CHANNEL_ID) throw new Error("QUEST_CHANNEL_ID is not defined in .env");
-        const levelChannel = (await client.channels.fetch(process.env.QUEST_CHANNEL_ID)) as TextChannel;
+        const levelChannel = (await client.channels.fetch(env.QUEST_CHANNEL_ID)) as TextChannel;
 
         const level = calculateLevel(xp);
 
