@@ -2,7 +2,7 @@ import { type ButtonInteraction, type Message, EmbedBuilder, ButtonStyle } from 
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class DragonCampaignQuest extends Quest.Base {
     public override buttons: AppButton[] = [new AppButton("Join", this.onPressJoin.bind(this))];
@@ -28,11 +28,7 @@ export default class DragonCampaignQuest extends Quest.Base {
             )
             .setURL(Globals.LINK);
 
-        const lobby = new EmbedBuilder()
-            .setTitle("Lobby")
-            .setDescription("No players have joined yet!")
-            .setColor("#FF4500")
-            .setURL(Globals.LINK);
+        const lobby = new EmbedBuilder().setTitle("Lobby").setDescription("No players have joined yet!").setColor("#FF4500").setURL(Globals.LINK);
 
         await Globals.CHANNEL.send({
             embeds: [embed],
@@ -51,8 +47,7 @@ export default class DragonCampaignQuest extends Quest.Base {
 
         users.forEach((user) => {
             const stats = user.database.stats;
-            playerStrength +=
-                stats.strength + stats.agility + stats.stamina + stats.magicka + stats.defense + stats.vitality;
+            playerStrength += stats.strength + stats.agility + stats.stamina + stats.magicka + stats.defense + stats.vitality;
         });
 
         // TODO: Make balancing better maybe idk
@@ -113,8 +108,7 @@ export default class DragonCampaignQuest extends Quest.Base {
 
         let joinedPlayerString: string = "";
 
-        for (const index in this.players)
-            joinedPlayerString += `${(await AppUser.fromID(this.players[index]!)).discord}, `;
+        for (const index in this.players) joinedPlayerString += `${(await AppUser.fromID(this.players[index]!)).discord}, `;
 
         const joinedPlayersEmbed = new EmbedBuilder()
             .setTitle("Lobby")

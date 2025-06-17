@@ -1,7 +1,7 @@
 import { Command } from "@/commands";
 import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import { AppUser } from "../user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class ProfileCommand extends Command.Base {
     // prettier-ignore
@@ -46,18 +46,14 @@ export default class ProfileCommand extends Command.Base {
 
         let inventoryString = "";
 
-        for (const [booleanValue, stringValue] of [...user.inventory.items].sort(
-            (a, b) => (b[0] === true ? 1 : 0) - (a[0] === true ? 1 : 0),
-        )) {
+        for (const [booleanValue, stringValue] of [...user.inventory.items].sort((a, b) => (b[0] === true ? 1 : 0) - (a[0] === true ? 1 : 0))) {
             const status = booleanValue ? "✅ (Ready)" : "❌"; // Compact status display
             inventoryString += `${status} ${stringValue}\n`;
         }
 
         return new EmbedBuilder()
             .setTitle(`${user.discord.displayName}'s Current Stats`)
-            .setDescription(
-                `**Stats**\n${statString}\n\n**Inventory**\n${inventoryString !== "" ? inventoryString : "No items..."}`,
-            )
+            .setDescription(`**Stats**\n${statString}\n\n**Inventory**\n${inventoryString !== "" ? inventoryString : "No items..."}`)
             .setColor(user.discord.hexAccentColor || 0x3498db)
             .setThumbnail(user.discord.avatarURL())
             .setFooter({ text: "Stats displayed" })

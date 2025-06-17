@@ -2,7 +2,7 @@ import { Message, type ButtonInteraction, EmbedBuilder, ButtonStyle } from "disc
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class SubscribePortalQuest extends Quest.Base {
     public override buttons: AppButton[] = [

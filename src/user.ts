@@ -1,5 +1,5 @@
 import { User, Guild, GuildMember, Role, PermissionsBitField, DiscordAPIError, TextChannel, EmbedBuilder } from "discord.js";
-import { client } from ".";
+import { client } from "./client";
 import { UserDB } from "./models/user";
 import { InventoryDB } from "./models/inventory";
 import { ItemDB } from "./models/item";

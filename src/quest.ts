@@ -1,6 +1,6 @@
 import { Client, type TextChannel, type Message } from "discord.js";
 import type { AppButton } from "./button";
-import { client } from ".";
+import { client } from "./client";
 
 export namespace Quest {
     export abstract class Base {

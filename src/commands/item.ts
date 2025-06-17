@@ -1,12 +1,7 @@
 import { Command } from "@/commands";
 import { ItemDB } from "@/models/item";
-import {
-    CommandInteraction,
-    InteractionResponse,
-    ApplicationCommandOptionType,
-    AutocompleteInteraction,
-} from "discord.js";
-import { Globals } from "..";
+import { CommandInteraction, InteractionResponse, ApplicationCommandOptionType, AutocompleteInteraction } from "discord.js";
+import { Globals } from "@/globals";
 
 export default class ItemCommand extends Command.Base {
     public override main: Command.Command = new Command.Command("item", "Item related stuff", []);
@@ -143,9 +138,7 @@ export default class ItemCommand extends Command.Base {
 
         const [keyPart, valuePart] = rawLast.split("=");
 
-        const filteredStats = possibleStats.filter((stat) =>
-            stat.toLowerCase().startsWith((keyPart ?? "").toLowerCase()),
-        );
+        const filteredStats = possibleStats.filter((stat) => stat.toLowerCase().startsWith((keyPart ?? "").toLowerCase()));
 
         const suggestions = filteredStats.map((stat) => {
             const newInput = parts.length > 0 ? parts.join(", ") + ", " + stat + "=" : stat + "=";

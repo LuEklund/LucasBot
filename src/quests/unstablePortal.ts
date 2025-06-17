@@ -2,7 +2,7 @@ import { Message, type ButtonInteraction, EmbedBuilder } from "discord.js";
 import { Quest } from "@/quest";
 import { AppButton } from "@/button";
 import { AppUser } from "@/user";
-import { Globals } from "..";
+import { Globals } from "@/globals";
 
 export default class UnstablePortalQuest extends Quest.Base {
     public override buttons: AppButton[] = [
@@ -35,8 +35,7 @@ export default class UnstablePortalQuest extends Quest.Base {
     private async onPressEnter(interaction: ButtonInteraction): Promise<void> {
         const user = await AppUser.fromID(interaction.user.id);
 
-        const successfullyEnterdPortal: boolean =
-            Math.floor(Math.random() * 100 - user.database.stats.magicka * 0.01) > 99;
+        const successfullyEnterdPortal: boolean = Math.floor(Math.random() * 100 - user.database.stats.magicka * 0.01) > 99;
         const successfullyEarnLoot: boolean = Math.random() > 0.5;
         const destroyedPortal: boolean = Math.random() > 0.6;
 
@@ -55,9 +54,7 @@ export default class UnstablePortalQuest extends Quest.Base {
 
     private async onPressDestroy(interaction: ButtonInteraction): Promise<void> {
         await interaction.reply({
-            content: this.isDestroyed
-                ? "You can't destroy the portal anymore... someone destroyed it!"
-                : "You destroyed the portal!",
+            content: this.isDestroyed ? "You can't destroy the portal anymore... someone destroyed it!" : "You destroyed the portal!",
             flags: "Ephemeral",
         });
         if (this.isDestroyed == false) this.end();
