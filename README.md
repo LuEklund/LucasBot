@@ -109,10 +109,10 @@ bun run test         # Bun test runner
 
 ```bash
 $ bun test
- 44 pass
+ 54 pass
  0 fail
- 70 expect() calls
-Ran 44 tests across 17 files. [506.00ms]
+ 92 expect() calls
+Ran 54 tests across 21 files. [846.00ms]
 ```
 
 ---
