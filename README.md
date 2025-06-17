@@ -65,6 +65,7 @@ $ cp .env.example .env
 #   MONGO_URI          – MongoDB connection string
 #   QUEST_CHANNEL_ID   – Text channel where quest logs are posted
 #   DEV_GUILD_ID       – (optional) Single guild to register commands in during dev
+#   (Values are accessed via `src/env.ts`.)
 
 # 4. Run in watch‑mode (hot reloads on file change)
 $ bun run dev
@@ -112,7 +113,7 @@ $ bun test
  65 pass
  0 fail
  133 expect() calls
-Ran 65 tests across 27 files. [590.00ms]
+Ran 65 tests across 27 files. [922.00ms]
 ```
 
 ---
