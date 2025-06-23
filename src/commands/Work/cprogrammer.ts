@@ -77,12 +77,9 @@ int main() {
         ],
 
         [
-`#ifndef WOW_H
-#define WOW_H
+`#pragma once;
 
-void wow()
-
-#endif`,
+void wow()`,
 
 `#pragma once
 
@@ -106,24 +103,28 @@ void wow()`,
             });
         });
 
-        const modal = new AppModal("C Internship, fix all the issues", fields, async (modal: AppModal, interaction: ModalSubmitInteraction) => {
-            let solvedCount: number = 0;
+        const modal = new AppModal(
+            "Fix all the issues and make the code clean and nice!".split(0, 45),
+            fields,
+            async (modal: AppModal, interaction: ModalSubmitInteraction) => {
+                let solvedCount: number = 0;
 
-            for (let i: number = 0; i < randomQuestions.length; i++) {
-                const answer = modal.getField(interaction, `#${i + 1}`);
-                const question = (randomQuestions[i] ?? ["", ""])[1];
-                if (answer === question) solvedCount++;
-            }
+                for (let i: number = 0; i < randomQuestions.length; i++) {
+                    const answer = modal.getField(interaction, `#${i + 1}`);
+                    const question = (randomQuestions[i] ?? ["", ""])[1];
+                    if (answer === question) solvedCount++;
+                }
 
-            const user = await AppUser.fromID(interaction.user.id);
-            const reward = solvedCount * Math.max(0, user.getStat("charisma") - 5) + user.getStat("magicka") / 2;
-            await user.addGold(reward).save();
+                const user = await AppUser.fromID(interaction.user.id);
+                const reward = solvedCount * Math.max(0, user.getStat("charisma") - 5) + user.getStat("magicka") / 2;
+                await user.addGold(reward).save();
 
-            await interaction.reply({
-                content: `You solved ${solvedCount}/${[...modal.fields.values()].length} c coding problems\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
-                flags: "Ephemeral",
-            });
-        });
+                await interaction.reply({
+                    content: `You solved ${solvedCount}/${[...modal.fields.values()].length} c coding problems\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
+                    flags: "Ephemeral",
+                });
+            },
+        );
 
         super(modal);
     }
