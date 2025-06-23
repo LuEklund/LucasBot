@@ -26,7 +26,7 @@ export default class ButtonService extends Service.Base {
     private handleModal = async (interaction: Interaction) => {
         if (!interaction.isModalSubmit()) return;
         const modal = AppModal.modals.get(interaction.customId);
-        if (modal) modal.onOpen(interaction);
+        if (modal) modal.onOpen(modal, interaction);
         else interaction.reply({ content: "This button is not active", flags: "Ephemeral" });
         console.log(`${new Date().toISOString()} ${interaction.user.displayName} opened modal ${(modal!.builder.data as any).title}`);
     };

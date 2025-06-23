@@ -37,16 +37,19 @@ export default class StudentProfession extends Profession {
                 name: `${question[0]}`,
                 style: "Short",
                 placeholder: "Don't you dare use a calculator",
+                required: false,
             });
         });
 
-        const modal = new AppModal("C Internship, fix all the issues", fields, async (interaction: ModalSubmitInteraction) => {
+        const modal = new AppModal("C Internship, fix all the issues", fields, async (modal: AppModal, interaction: ModalSubmitInteraction) => {
             let solvedCount: number = 0;
 
             for (let i: number = 0; i < randomQuestions.length; i++) {
-                const answer = interaction.fields.getField(`${randomQuestions[i]}`).value as string;
-                const question = randomQuestions[i] ?? "";
-                if (String(answer).trim() === String(question[1]).trim()) solvedCount++;
+                const answer = modal.getField(interaction, randomQuestions[i]?.[0] || "");
+                const question: string = (randomQuestions[i] ?? ["", ""])[1];
+                console.log(`A: ${answer.toString()} Q: ${question.toString()}`);
+
+                if (answer === question) solvedCount++;
             }
 
             const user = await AppUser.fromID(interaction.user.id);
@@ -54,7 +57,7 @@ export default class StudentProfession extends Profession {
             await user.addGold(reward).save();
 
             await interaction.reply({
-                content: `You solved ${solvedCount}/${modal.fields.length} math problems\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
+                content: `You solved ${solvedCount}/${[...modal.fields.values()].length} math problems\n+${reward.toFixed(2)} ${Globals.ATTRIBUTES.gold.emoji}`,
                 flags: "Ephemeral",
             });
         });

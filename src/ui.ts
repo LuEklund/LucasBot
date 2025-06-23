@@ -59,21 +59,21 @@ export interface AppModalField {
 export class AppModal {
     id: string;
     builder: ModalBuilder;
-    fields: string[] = [];
-    onOpen: (interaction: ModalSubmitInteraction) => void;
+    fields: Map<string, string> = new Map();
+    onOpen: (modal: AppModal, interaction: ModalSubmitInteraction) => void;
 
     static modals: Map<string, AppModal> = new Map();
 
-    constructor(title: string, fields: AppModalField[], onOpen: (interaction: ModalSubmitInteraction) => void) {
+    constructor(title: string, fields: AppModalField[], onOpen: (modal: AppModal, interaction: ModalSubmitInteraction) => void) {
         this.onOpen = onOpen;
-        const randomId = Math.random();
-        this.id = `#m${randomId.toString()}`;
+        this.id = `#m${Math.random().toString()}`;
 
         let rows: ActionRowBuilder[] = [];
 
         fields.forEach((field) => {
+            const id = `#mt${Math.random().toString()}`;
             const textInput = new TextInputBuilder()
-                .setCustomId(field.name)
+                .setCustomId(id)
                 .setLabel(field.name)
                 .setValue(field.value || "")
                 .setPlaceholder(field.placeholder || "")
@@ -82,7 +82,7 @@ export class AppModal {
                 .setMinLength(field.minLength || 0)
                 .setMaxLength(field.maxLength || 4000);
 
-            this.fields.push(field.name);
+            this.fields.set(field.name, id);
             rows.push(new ActionRowBuilder().addComponents(textInput));
         });
 
@@ -92,5 +92,9 @@ export class AppModal {
             .addComponents(rows as any);
 
         AppModal.modals.set(this.id, this);
+    }
+
+    getField(interaction: ModalSubmitInteraction, name: string): string {
+        return interaction.fields.getField(this.fields.get(name) || "").value as string;
     }
 }
