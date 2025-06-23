@@ -18,7 +18,7 @@ export default class StudentProfession extends Profession {
         ["8+2*3", "14"],
         ["(8+2)*3", "30"],
         ["15%4", "3"],
-        ["3**2", "9"],
+        ["3*2", "6"],
         ["9+10", "19"],
         ["14-7", "7"],
         ["0*100", "0"],
@@ -34,9 +34,9 @@ export default class StudentProfession extends Profession {
             questions.push(question);
 
             fields.push({
-                name: `#${i + 1}`,
-                value: question[0].slice(0, 4000),
+                name: `${question[0]}`,
                 style: "Short",
+                placeholder: "Don't you dare use a calculator",
             });
         });
 
@@ -44,7 +44,7 @@ export default class StudentProfession extends Profession {
             let solvedCount: number = 0;
 
             for (let i: number = 0; i < randomQuestions.length; i++) {
-                const answer = interaction.fields.getField(`#${i + 1}`).value as string;
+                const answer = interaction.fields.getField(`${randomQuestions[i]}`).value as string;
                 const question = randomQuestions[i] ?? "";
                 if (String(answer).trim() === String(question[1]).trim()) solvedCount++;
             }

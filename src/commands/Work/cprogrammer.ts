@@ -101,7 +101,7 @@ void wow()`,
 
             fields.push({
                 name: `#${i + 1}`,
-                value: question[0].slice(0, 4000),
+                value: question[0],
                 style: "Paragraph",
             });
         });
