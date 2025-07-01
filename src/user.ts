@@ -139,7 +139,7 @@ export class AppUser {
             reductionFactor = Math.max(0, Math.min(1, reductionFactor));
             amount = amount * (1 - reductionFactor);
         }
-        this.database.xp = Math.max(-100, amount);
+        this.database.xp = Math.max(-100, Math.round(amount));
 
         return this;
     }
@@ -149,7 +149,7 @@ export class AppUser {
     }
 
     setGold(amount: number): AppUser {
-        this.inventory.gold = Math.max(-1000, amount);
+       this.inventory.gold = Math.max(-1000, Math.round(amount * 100) / 100);
 
         return this;
     }
