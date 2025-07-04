@@ -23,7 +23,7 @@ async function addPlayerToConext(appUser: AppUser, context: SKRSContext2D, Borde
     context.textBaseline = "middle";
     context.fillStyle = "white";
     context.strokeStyle = "#000000";
-    context.font = `${pfpSize}px Bangers`;
+    context.font = ${pfpSize}px Bangers;
     context.lineWidth = 1;
     const playerAvatarUrl = appUser.discord.displayAvatarURL({
         extension: "png",
@@ -57,7 +57,7 @@ async function addPlayerToConext(appUser: AppUser, context: SKRSContext2D, Borde
             context.drawImage(BorderImage, pfpImagePosXStart, 0, pfpSize, pfpSize);
         }
     } catch (error) {
-        console.error(`Failed to load player avatar from ${playerAvatarUrl}:`, error);
+        console.error(Failed to load player avatar from ${playerAvatarUrl}:, error);
         context.fillText(appUser.database.username, pfpImagePosXStart + pfpSize / 2, pfpSize / 2);
         context.strokeText(appUser.database.username, pfpImagePosXStart + pfpSize / 2, pfpSize / 2);
     }
@@ -82,7 +82,7 @@ function getPosSign(num: number) {
 }
 
 async function addAction(context: SKRSContext2D, currentGame: FightGame, action: PlayerAction) {
-    context.font = `30px Bangers`;
+    context.font = 30px Bangers;
     const attackedPlayer = currentGame.getNextPlayer();
 
     const currentPlayer = currentGame.getCurrentPlayer();
@@ -99,7 +99,7 @@ async function addAction(context: SKRSContext2D, currentGame: FightGame, action:
                     BLOCK_WIDTH / 2,
                     BLOCK_WIDTH / 2,
                 );
-                addTextToContext(context, `-1`, currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4, BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8);
+                addTextToContext(context, -1, currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4, BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8);
             } else {
                 await addImageToContext(
                     context,
@@ -123,7 +123,7 @@ async function addAction(context: SKRSContext2D, currentGame: FightGame, action:
                     BLOCK_WIDTH / 2,
                     BLOCK_WIDTH / 2,
                 );
-                addTextToContext(context, `-1`, currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4, BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8);
+                addTextToContext(context, -1, currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4, BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8);
             }
 
             break;
@@ -138,7 +138,7 @@ async function addAction(context: SKRSContext2D, currentGame: FightGame, action:
             );
             addTextToContext(
                 context,
-                `+${action.healthRegained?.toFixed(1)}`,
+                +${action.healthRegained?.toFixed(1)},
                 currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4,
                 BLOCK_HEIGHT / 5 + BLOCK_HEIGHT / 10,
             );
@@ -152,7 +152,7 @@ async function addAction(context: SKRSContext2D, currentGame: FightGame, action:
             );
             addTextToContext(
                 context,
-                `+${action.manaRegained?.toFixed(1)}`,
+                +${action.manaRegained?.toFixed(1)},
                 currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4,
                 BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8,
             );
@@ -167,7 +167,7 @@ async function addAction(context: SKRSContext2D, currentGame: FightGame, action:
                 BLOCK_WIDTH / 2,
                 BLOCK_WIDTH / 2,
             );
-            addTextToContext(context, `-1`, currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4, BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8);
+            addTextToContext(context, -1, currentPlayer.posX * BLOCK_WIDTH + BLOCK_WIDTH / 4, BLOCK_HEIGHT / 2 + BLOCK_HEIGHT / 8);
             break;
         case "escape":
             await addImageToContext(context, "./assets/escape.png", currentPlayer.posX * BLOCK_WIDTH, BLOCK_HEIGHT / 2, BLOCK_WIDTH, BLOCK_WIDTH);
@@ -187,7 +187,7 @@ export async function getFieldImage(currentGame: FightGame, action: PlayerAction
     try {
         defaultBlockImage = await loadImage(squareBlockImagePath);
     } catch (error) {
-        console.error(`Failed to load square block image from ${squareBlockImagePath}:`, error);
+        console.error(Failed to load square block image from ${squareBlockImagePath}:, error);
         context.fillStyle = "#CCCCCC";
     }
 
@@ -195,7 +195,7 @@ export async function getFieldImage(currentGame: FightGame, action: PlayerAction
     try {
         BorderImage = await loadImage(borderImagePath);
     } catch (error) {
-        console.error(`Failed to load square block image from ${borderImagePath}:`, error);
+        console.error(Failed to load square block image from ${borderImagePath}:, error);
         context.fillStyle = "#BBBBBB";
     }
 
@@ -226,7 +226,7 @@ export async function createStatBar(current: number, max: number, length: number
     const filledBar = "█".repeat(filled);
     const emptyBar = " ".repeat(empty);
     // Using ANSI code block for better visual consistency of the bar
-    return `${current.toFixed(2)}/${max.toFixed(2)}\`\`\`ansi\n[2;${filledColorCode}m${filledBar}[0m[2;37m${emptyBar}[0m\n\`\`\` `;
+    return ${current.toFixed(2)}/${max.toFixed(2)}\\\ansi\n[2;${filledColorCode}m${filledBar}[0m[2;37m${emptyBar}[0m\n\\\ ;
 }
 
 export async function getItemDisplay(player: Fighter) {
@@ -245,22 +245,22 @@ export async function getItemDisplay(player: Fighter) {
     for (const { item, count } of Object.values(grouped)) {
         const flatModifiers = Object.entries(item.flatModifiers ?? {})
             .filter(([k, v]) => v !== 0 && Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES])
-            .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v}`)
+            .map(([k, v]) => ${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v})
             .join(", ");
 
         const percentageModifiers = Object.entries(item.percentageModifiers ?? {})
             .filter(([k, v]) => v !== 0 && Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES])
-            .map(([k, v]) => `${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v * 100}%`)
+            .map(([k, v]) => ${Globals.ATTRIBUTES[k as keyof typeof Globals.ATTRIBUTES].emoji} ${v > 0 ? "+" : ""}${v * 100}%)
             .join(", ");
 
         const modifiers = [flatModifiers, percentageModifiers].filter(Boolean).join("\n");
 
-        itemsDisplay += `**${count > 1 ? `x${count} ` : ""}${item.name}**\nType: ${item.type ?? "???"}${modifiers ? `\n${modifiers}` : ""}\n\n`;
+        itemsDisplay += **${count > 1 ? x${count}  : ""}${item.name}**\nType: ${item.type ?? "???"}${modifiers ? \n${modifiers} : ""}\n\n;
     }
 
     return {
-        name: `${player.appUser.discord.displayName}'s Items`,
-        value: `📦 Items: \n${itemsDisplay.trim() || "None"}\n`,
+        name: ${player.appUser.discord.displayName}'s Items,
+        value: 📦 Items: \n${itemsDisplay.trim() || "None"}\n,
         inline: true,
     };
 }
@@ -277,12 +277,12 @@ export async function getStatsDisplay(player: Fighter) {
     const statString = statsData
         .map((stat) => {
             const padded = stat.name.padEnd(maxNameLength, " ");
-            return `${stat.emoji} ${padded}: ${stat.value} + ${(player.appUser.getStat(stat.name.toLowerCase() as UserDB.StatDB.Type) - stat.value).toFixed(2)}`;
+            return ${stat.emoji} ${padded}: ${stat.value} + ${(player.appUser.getStat(stat.name.toLowerCase() as UserDB.StatDB.Type) - stat.value).toFixed(2)};
         })
         .join("\n");
 
     return {
-        name: `${player.appUser.discord.displayName}'s Stats`,
+        name: ${player.appUser.discord.displayName}'s Stats,
         value: statString + "\n\n\n",
         inline: true,
     };
@@ -305,7 +305,7 @@ export async function getFightDisplay(currentGame: FightGame, action: PlayerActi
     const builder = new EmbedBuilder()
         .setColor(0x0099ff)
         .setAuthor({
-            name: `It's ${nextPlayer.appUser.discord.displayName}'s Turn!`,
+            name: It's ${nextPlayer.appUser.discord.displayName}'s Turn!,
             iconURL: nextPlayer.appUser.discord.avatarURL()!,
         })
         .setImage("attachment://game-field.png")
@@ -338,7 +338,7 @@ export async function getFightDisplay(currentGame: FightGame, action: PlayerActi
             },
         )
         .setFooter({
-            text: `➡️ It's ${nextPlayer.appUser.discord.displayName}'s Turn!`,
+            text: ➡️ It's ${nextPlayer.appUser.discord.displayName}'s Turn!,
             iconURL: nextPlayer.appUser.discord.avatarURL()!,
         })
         .setTimestamp();

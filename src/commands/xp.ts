@@ -55,17 +55,23 @@ export default class XpCommand extends Command.Base {
     public async onTop(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
         const topUsers = await UserDB.Model.find().sort({ xp: -1 }).limit(10).exec();
 
-        if (topUsers.length === 0) return await interaction.reply("No users found in the leaderboard.");
+        if (topUsers.length === 0) return await interaction.reply("No users found in the leaderboard. Looks like everyone’s still napping 💤.");
 
         const lines = await Promise.all(
             topUsers.map(async (user, index) => {
-                const name = (await AppUser.fromID(user.id)).discord.displayName;
-                return `#${index + 1} ${name}:   ${user.xp.toFixed(2)} ${Globals.ATTRIBUTES.xp.emoji}`;
+                const appUser = await AppUser.fromID(user.id);
+                const name = appUser.discord.displayName || "Unknown Hero";
+                const xpFormatted = user.xp.toFixed(2);
+                return `**#${index + 1}** - ${name} — *${xpFormatted}* ${Globals.ATTRIBUTES.xp.emoji}`;
             }),
         );
-        const description = lines.join("\n");
 
-        const embed = new EmbedBuilder().setTitle("🏆 XP Leaderboard").setDescription(description).setColor("#FFD700");
+        const embed = new EmbedBuilder()
+            .setTitle("🏆 XP Leaderboard")
+            .setDescription(lines.join("\n"))
+            .setColor("#FFD700")
+            .setFooter({ text: "Keep grinding or keep hiding... your choice." })
+            .setTimestamp();
 
         return await interaction.reply({ embeds: [embed] });
     }
@@ -77,12 +83,16 @@ export default class XpCommand extends Command.Base {
 
         const user = await AppUser.fromID(userOpt.id);
 
-        const newLevel = calculateLevel(user.database.xp);
-        if (newLevel < user.database.level) user.database.level = newLevel;
-
+        // math is cool, and confusing,... i think ----- SFIF WAS HERE!!!!!!!!
         await user.setXP(amountOpt).save();
 
-        return interaction.reply({ content: `Set ${amountOpt} xp to ${user.discord}`, flags: "Ephemeral" });
+        const newLevel = calculateLevel(amountOpt);
+        if (newLevel < user.database.level) user.database.level = newLevel;
+
+        return interaction.reply({
+            content: `XP has been **set** to ${amountOpt.toFixed(2)} for ${user.discord.displayName}. Level adjustment? Hopefully you leveled up IRL too! 🎉`,
+            flags: "Ephemeral",
+        });
     }
 
     public async onAdd(interaction: CommandInteraction): Promise<InteractionResponse<boolean>> {
@@ -92,11 +102,14 @@ export default class XpCommand extends Command.Base {
 
         const user = await AppUser.fromID(userOpt.id);
 
+        await user.addXP(amountOpt).save();
+
         const newLevel = calculateLevel(user.database.xp);
         if (newLevel < user.database.level) user.database.level = newLevel;
 
-        await user.addXP(amountOpt).save();
-
-        return interaction.reply({ content: `Added ${amountOpt} xp to ${user.discord}`, flags: "Ephemeral" });
+        return interaction.reply({
+            content: `Added **${amountOpt.toFixed(2)}** XP to ${user.discord.displayName}. Keep up the grind, champ! 💪`,
+            flags: "Ephemeral",
+        });
     }
 }

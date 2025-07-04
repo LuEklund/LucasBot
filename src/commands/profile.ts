@@ -41,57 +41,52 @@ export default class ProfileCommand extends Command.Base {
         });
     }
 
+    private progressBar(value: number, max: number, size = 15) {
+        const progress = Math.round((value / max) * size);
+        const emptyProgress = size - progress;
+        const bar = "█".repeat(progress) + "░".repeat(emptyProgress);
+        return `\`${bar}\``;
+    }
+
     private async generateEmbed(user: AppUser): Promise<EmbedBuilder> {
-        let stuffField: APIEmbedField = { name: "", value: "", inline: false };
-        ["level", "xp", "gold", "skillpoint"].forEach((key) => {
-            const attribute = Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES];
-            if (!attribute) {
-                stuffField.value += `🚫: ${key}\n`;
-                return;
-            }
+        const level = user.database.level || 1;
+        const xp = user.database.xp || 0;
+        const xpToNext = (level + 1) * 100;
+        const gold = user.inventory.gold;
+        const skillPoints = user.database.skillPoints;
 
-            const value =
-                key === "gold"
-                    ? user.inventory.gold
-                    : key === "skillpoint"
-                      ? user.database.skillPoints
-                      : (user.database[attribute.value as keyof typeof user.database] as number);
-
-            const valueStr = typeof value === "number" && !Number.isNaN(value) ? value.toFixed(2) : "N/A";
-
-            stuffField.value += `${attribute.emoji} ${attribute.name} ${valueStr}\n`;
-        });
-
-        let statField: APIEmbedField = { name: "Stats", value: "", inline: false };
-        UserDB.StatDB.keyArray.forEach((key) => {
-            const attribute = Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES];
-            if (!attribute) {
-                stuffField.value += `🚫 ${key}: none\n`;
-                return;
-            }
-            const value = user.database.stats[attribute.value as UserDB.StatDB.Type];
-            const valueFromItems = user.getStat(attribute.value as UserDB.StatDB.Type) - value;
-            statField.value += `${attribute.emoji} ${attribute.name}: ${value.toFixed(2)} ${valueFromItems > 0 ? "+" : ""} ${valueFromItems.toFixed(2)}\n`;
-        });
-
-        let inventoryField: APIEmbedField = { name: "Inventory", value: "", inline: false };
-        let equippedField: APIEmbedField = {
-            name: "Equipped ✅                                               \u200B",
-            value: "",
-            inline: true,
+        const stuffField: APIEmbedField = {
+            name: "🎯 Basic Info",
+            value: [
+                `${Globals.ATTRIBUTES.level.emoji} Level: **${level}**`,
+                `${Globals.ATTRIBUTES.xp.emoji} XP: **${xp.toFixed(2)}** / ${xpToNext} ${this.progressBar(xp, xpToNext)}`,
+                `${Globals.ATTRIBUTES.gold.emoji} Gold: **${gold.toFixed(2)}**`,
+                `${Globals.ATTRIBUTES.skillpoint.emoji} Skill Points: **${skillPoints}** ${this.progressBar(skillPoints, 10, 10)}`,
+            ].join("\n"),
+            inline: false,
         };
-        let unequippedField: APIEmbedField = {
-            name: "Unequipped ❌",
-            value: "",
+
+        const statLines = UserDB.StatDB.keyArray.map((key) => {
+            const attribute = Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES];
+            if (!attribute) return `🚫 ${key}: none`;
+
+            const base = user.database.stats[attribute.value as UserDB.StatDB.Type];
+            const total = user.getStat(attribute.value as UserDB.StatDB.Type);
+            const bonus = total - base;
+            const bonusStr = bonus > 0 ? ` (+${bonus.toFixed(2)})` : "";
+            return `${attribute.emoji} ${attribute.name}: **${total.toFixed(2)}**${bonusStr}`;
+        });
+
+        const statField: APIEmbedField = {
+            name: "📊 Stats",
+            value: statLines.join("\n"),
             inline: true,
         };
 
         let groupedMap = new Map<string, [boolean, string, number]>();
-
         user.inventory.items.forEach(([equipped, name]) => {
             const normalizedName = name.trim().toLowerCase();
             const key = `${equipped}-${normalizedName}`;
-
             if (groupedMap.has(key)) {
                 const entry = groupedMap.get(key)!;
                 entry[2] += 1;
@@ -99,55 +94,66 @@ export default class ProfileCommand extends Command.Base {
                 groupedMap.set(key, [equipped, name, 1]);
             }
         });
-
         let groupedItems: [boolean, string, number][] = Array.from(groupedMap.values());
+        groupedItems.sort((a, b) => {
+            const aItem = Item.manager.findByName(a[1]);
+            const bItem = Item.manager.findByName(b[1]);
 
-        groupedItems
-            .sort((a, b) => {
-                const aItem = Item.manager.findByName(a[1]);
-                const bItem = Item.manager.findByName(b[1]);
+            const indexA = Item.keyArray.indexOf(aItem ? aItem.type : "");
+            const indexB = Item.keyArray.indexOf(bItem ? bItem.type : "");
 
-                const indexA = Item.keyArray.indexOf(aItem ? aItem.type : "");
-                const indexB = Item.keyArray.indexOf(bItem ? bItem.type : "");
+            const safeIndexA = indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA;
+            const safeIndexB = indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB;
 
-                const safeIndexA = indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA;
-                const safeIndexB = indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB;
+            if (safeIndexA !== safeIndexB) return safeIndexA - safeIndexB;
+            else return a[1].localeCompare(b[1]);
+        });
 
-                if (safeIndexA !== safeIndexB) return safeIndexA - safeIndexB;
-                else return a[1].localeCompare(b[1]);
-            })
-            .forEach(([equipped, name, times]) => {
-                const item = Item.manager.findByName(name);
-                if (!item) return;
+        const buildItemLines = (items: [boolean, string, number][]) =>
+            items
+                .map(([equipped, name, count]) => {
+                    const item = Item.manager.findByName(name);
+                    if (!item) return null;
 
-                let modifierString: string = undefined!;
-                const flat = Object.entries(item.flatModifiers);
-                const percent = Object.entries(item.percentageModifiers);
-                const all = [...flat, ...percent];
-                for (const [index, [key, value]] of all.entries()) {
-                    const attribute = Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES];
-                    if (!attribute) {
-                        modifierString += `🚫  ${key}: none\n`;
-                        continue;
+                    const flatMods = Object.entries(item.flatModifiers);
+                    const percentMods = Object.entries(item.percentageModifiers);
+                    let modifierString = "";
+
+                    for (const [key, value] of [...flatMods, ...percentMods]) {
+                        const attr = Globals.ATTRIBUTES[key as keyof typeof Globals.ATTRIBUTES];
+                        if (!attr) {
+                            modifierString += `🚫  ${key}: none\n`;
+                            continue;
+                        }
+                        const isPercent = percentMods.find((e) => e[0] === key) !== undefined;
+                        modifierString += `*${attr.emoji} ${value > 0 ? "+" : ""}${isPercent ? (value * 100).toFixed(0) : value.toFixed(2)}${isPercent ? "%" : ""}*\n`;
                     }
+                    return `**x${count} ${item.name}**\n*Type: ${item.type}*\n${modifierString}`;
+                })
+                .filter(Boolean)
+                .join("\n\n");
 
-                    const isPercent = index >= flat.length;
-                    modifierString += `*${attribute.emoji} ${value > 0 ? "+" : ""}${isPercent ? (value * 100).toFixed(0) : value.toFixed(2)}${isPercent ? "%" : ""}*\n`;
-                }
+        const equippedItems = groupedItems.filter((i) => i[0]);
+        const unequippedItems = groupedItems.filter((i) => !i[0]);
 
-                (equipped ? equippedField : unequippedField).value += `**x${times} ${item.name}**\n*Type: ${item.type}*\n${modifierString || ""}\n`;
-            });
-
-        equippedField.value = equippedField.value.slice(0, 1000);
-        equippedField.value = equippedField.value.slice(0, 1000);
+        const equippedField: APIEmbedField = {
+            name: "🛡️ Equipped",
+            value: equippedItems.length > 0 ? buildItemLines(equippedItems) : "_None_",
+            inline: true,
+        };
+        const unequippedField: APIEmbedField = {
+            name: "🎒 Unequipped",
+            value: unequippedItems.length > 0 ? buildItemLines(unequippedItems) : "_None_",
+            inline: true,
+        };
 
         return new EmbedBuilder()
             .setTitle(`${user.discord.displayName}'s Profile`)
             .setColor(user.discord.hexAccentColor || 0x3498db)
-            .setThumbnail(user.discord.avatarURL())
-            .setFooter({ text: "Profile displayed" })
+            .setThumbnail(user.discord.avatarURL() || undefined)
+            .setFooter({ text: "Profile" })
             .setTimestamp()
-            .setFields([stuffField, statField, inventoryField, equippedField, unequippedField].slice(0, 25));
+            .addFields(stuffField, statField, equippedField, unequippedField);
     }
 
     private async generateButtons(): Promise<AppButton[]> {
