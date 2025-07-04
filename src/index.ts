@@ -55,7 +55,7 @@ export namespace Globals {
         skillpoint: {
             name: "Skillpoint",
             value: "skillpoint",
-            emoji: ":bulb:",
+            emoji: "💡",
         },
         item: {
             name: "Item",
