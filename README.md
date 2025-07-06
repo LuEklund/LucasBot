@@ -71,3 +71,8 @@ Then run
 ```shell
 bun add discord.js && bun add mongoose
 ```
+
+## Lead Devlopers
+
+[![Lucas](https://github.com/LuEklund.png?size=40)](https://github.com/LuEklund)
+[![Harald](https://github.com/HaraldWik.png?size=40)](https://github.com/HaraldWik)
