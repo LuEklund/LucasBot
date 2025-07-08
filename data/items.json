@@ -1,3 +1,6 @@
+//100g = 1skillpoint (strength, vitality... etc.)
+//10000g = 100% == 1
+
 [
     {
         "name": "Nokia Phone",
@@ -7,17 +10,16 @@
             "defense": 0.8
         },
         "percentageModifiers": {
-            "defense": 0.02,
-            "charisma": 0.1
         }
     },
     {
         "name": "Stained White T-Shirt",
         "type": "chestplate",
         "cost": 250,
-        "flatModifiers": {},
+        "flatModifiers": {
+            "defense": 2.5
+        },
         "percentageModifiers": {
-            "defense": 0.25
         }
     },
     {
@@ -34,12 +36,9 @@
         "type": "weapon",
         "cost": 1400,
         "flatModifiers": {
-            "strength": 4,
-            "defense": 2,
-            "charisma": 3
         },
         "percentageModifiers": {
-            "strength": 0.5
+            "strength": 0.14
         }
     },
     {
@@ -47,13 +46,9 @@
         "type": "weapon",
         "cost": 650,
         "flatModifiers": {
-            "strength": 3,
-            "defense": 0.5,
-            "charisma": 1
         },
         "percentageModifiers": {
-            "strength": 0.1,
-            "agility": 0.1
+            "strength": 0.065,
         }
     },
     {
@@ -98,10 +93,10 @@
         "type": "leggings",
         "cost": 130,
         "flatModifiers": {
-            "defense": 0.8
+            "defense": 1.3
         },
         "percentageModifiers": {
-            "charisma": 0.12,
+            "charisma": 0.08,
             "agility": -0.08
         }
     },
@@ -120,12 +115,11 @@
         "cost": 170,
         "flatModifiers": {
             "strength": 1.2,
-            "defense": 0.4
+            "defense": 0.5
         },
         "percentageModifiers": {
-            "strength": 0.05,
             "defense": 0.05,
-            "agility": -0.1
+            "agility": -0.5
         }
     },
     {
@@ -154,6 +148,7 @@
             "defense": 3
         },
         "percentageModifiers": {
+            "defense": 0.1,
             "agility": -0.1
         }
     },
@@ -173,9 +168,10 @@
         "flatModifiers": {
             "stamina": 1,
             "vitality": 0.2
+            "stamina": 0.4
         },
         "percentageModifiers": {
-            "stamina": 0.02
+
         }
     },
     {
@@ -183,10 +179,9 @@
         "type": "item",
         "cost": 800,
         "flatModifiers": {
-            "vitality": 4
         },
         "percentageModifiers": {
-            "vitality": 0.4
+            "vitality": 0.08
         }
     },
     {
@@ -194,10 +189,9 @@
         "type": "item",
         "cost": 1200,
         "flatModifiers": {
-            "magicka": 10
+            "magicka": 12
         },
         "percentageModifiers": {
-            "magicka": 0.2
         }
     },
     {
@@ -205,10 +199,9 @@
         "type": "item",
         "cost": 800,
         "flatModifiers": {
-            "magicka": 7
+            "magicka": 8
         },
         "percentageModifiers": {
-            "magicka": 0.1
         }
     },
     {
@@ -270,10 +263,10 @@
         "cost": 500,
         "type": "boots",
         "flatModifiers": {
-            "defense": 1
+            "defense": 1,
+            "agility": 4
         },
         "percentageModifiers": {
-            "agility": 0.4
         }
     },
     {
@@ -319,10 +312,9 @@
         "type": "item",
         "cost": 250,
         "flatModifiers": {
-            "vitality": 1.65
+            "vitality": 2.5
         },
         "percentageModifiers": {
-            "vitality": 0.11
         },
         "image_url": ""
     },
@@ -331,11 +323,10 @@
         "type": "helmet",
         "cost": 1200,
         "flatModifiers": {
-            "charisma": 11,
-            "vitality": 1.2
+            "charisma": 10,
+            "vitality": 2
         },
         "percentageModifiers": {
-            "defense": 0.1
         },
         "image_url": ""
     }
