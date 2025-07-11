@@ -69,7 +69,7 @@ Now to run the bot you need [Bun](https://bun.sh/).
 Then run
 
 ```shell
-bun add discord.js && bun add mongoose
+bun install && bun run dev
 ```
 
 ## Lead Devlopers
