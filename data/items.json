@@ -151,7 +151,7 @@
     },
     {
         "name": "Leather Chestplate",
-        "type": "item",
+        "type": "chestplate",
         "cost": 150,
         "flatModifiers": {
             "defense": 1.5
@@ -163,9 +163,8 @@
         "type": "item",
         "cost": 160,
         "flatModifiers": {
-            "stamina": 1,
+            "stamina": 1.4,
             "vitality": 0.2
-            "stamina": 0.4
         },
         "percentageModifiers": {
 
