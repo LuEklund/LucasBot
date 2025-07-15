@@ -138,8 +138,8 @@ export default class ProfileCommand extends Command.Base {
                 (equipped ? equippedField : unequippedField).value += `**x${times} ${item.name}**\n*Type: ${item.type}*\n${modifierString || ""}\n`;
             });
 
-        equippedField.value = equippedField.value.slice(0, 1000);
-        equippedField.value = equippedField.value.slice(0, 1000);
+        const len: number = (equippedField.value = equippedField.value.slice(0, 900)).length;
+        unequippedField.value = unequippedField.value.slice(0, 901 - len);
 
         return new EmbedBuilder()
             .setTitle(`${user.discord.displayName}'s Profile`)
