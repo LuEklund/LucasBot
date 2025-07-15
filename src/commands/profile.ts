@@ -120,7 +120,7 @@ export default class ProfileCommand extends Command.Base {
                 const item = Item.manager.findByName(name);
                 if (!item) return;
 
-                let modifierString: string = undefined!;
+                let modifierString: string = "";
                 const flat = Object.entries(item.flatModifiers);
                 const percent = Object.entries(item.percentageModifiers);
                 const all = [...flat, ...percent];
